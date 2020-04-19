@@ -1,0 +1,11 @@
+howto compile pinmame for iOS
+
+1) install subversion
+apt-get install subversion
+
+2) get latest code
+svn checkout https://svn.code.sf.net/p/pinmame/code/trunk pinmame-code
+
+3) compile
+cd pinmame-code
+open PinMAME.xcodeproj

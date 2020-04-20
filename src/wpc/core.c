@@ -15,7 +15,7 @@
 #ifdef VPINMAME
  #include <windows.h>
 #endif
-#if defined(VPINMAME) || defined(PINMAME_DLL)
+#if defined(VPINMAME) || defined(PINMAME_DLL) || defined(PINMAME_FRAMEWORK)
  #include "dmddevice.h"
 
  UINT8  g_raw_dmdbuffer[DMD_MAXY*DMD_MAXX];
@@ -801,7 +801,7 @@ void video_update_core_dmd(struct mame_bitmap *bitmap, const struct rectangle *c
 	  (strncasecmp(Machine->gamedrv->name, "smb", 3) == 0) || (strncasecmp(Machine->gamedrv->name, "cueball", 7) == 0) ||
 	  (core_gameData->gen == GEN_ALVG_DMD2));
 
-#if defined(VPINMAME) || defined(PINMAME_DLL)
+#if defined(VPINMAME) || defined(PINMAME_DLL) || defined(PINMAME_FRAMEWORK)
 
   const UINT8 perc0 = (pmoptions.dmd_perc0  > 0) ? pmoptions.dmd_perc0  : 20;
   const UINT8 perc1 = (pmoptions.dmd_perc33 > 0) ? pmoptions.dmd_perc33 : 33;
@@ -892,7 +892,7 @@ void video_update_core_dmd(struct mame_bitmap *bitmap, const struct rectangle *c
     if (ii > 0) {
       for (jj = 0; jj < layout->length; jj++) {
         const UINT8 col = coreGlobals.dotCol[ii][jj];
-#if defined(VPINMAME) || defined(PINMAME_DLL)
+#if defined(VPINMAME) || defined(PINMAME_DLL) || defined(PINMAME_FRAMEWORK)
         const int offs = (ii-1)*layout->length + jj;
         currbuffer[offs] = col;
         if(layout->length >= 128) { // Capcom hack

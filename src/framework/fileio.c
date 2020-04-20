@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <strings.h>
 #include "rc.h"
 
 #define VERBOSE                0

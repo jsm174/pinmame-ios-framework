@@ -586,7 +586,7 @@ int cli_frontend_init (int argc, char **argv)
         {
                 /* do we have a driver for this? */
                 for (i = 0; drivers[i]; i++)
-                        if (_stricmp(gamename,drivers[i]->name) == 0)
+                        if (strcasecmp(gamename,drivers[i]->name) == 0)
                         {
                                 game_index = i;
                                 break;

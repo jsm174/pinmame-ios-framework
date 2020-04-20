@@ -43,7 +43,7 @@ void pinmame_log(const char *fmt, ...) {
 int get_game_num(const char* name) {
     int gamenum = 0;
     while (drivers[gamenum]) {
-        if (!_stricmp(drivers[gamenum]->name, name))
+        if (strcasecmp(drivers[gamenum]->name, name) == 0)
             break;
         gamenum++;
     }

@@ -5,11 +5,6 @@
 #pragma once
 #endif
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
- #include <strings.h>
- #define _stricmp strcasecmp
-#endif
-
 #define PINMAME_EXT     1 // PinMAME extensions added to MAME source
 #define PINMAME_EXIT    1 // Use Machine->exitfunc (normally only in MESS)
 #define WPCDCSSPEEDUP   1 // DCS Speedup added to MAME ADSP emulation
@@ -18,6 +13,7 @@
 
 #define TINY_COMPILE
 #define NEOFREE
+
 
 #if (MAMEVER >= 6800) && (MAMEVER < 7100)
 #  ifndef INVALID_FILE_ATTRIBUTES

@@ -469,6 +469,7 @@ DRIVER(trek,117)        //Data East MPU: 01/92 Star Trek 25th Anniversary (1.17)
 DRIVER(trek,120)        //Data East MPU: 01/92 Star Trek 25th Anniversary (1.20)
 DRIVER(trek,200)        //Data East MPU: 04/92 Star Trek 25th Anniversary (2.00)
 DRIVER(trek,201)        //Data East MPU: 04/92 Star Trek 25th Anniversary (2.01)
+DRIVER(trek,300)        //Data East MPU: 04/20 Star Trek 25th Anniversary (3.00 unofficial MOD)
 DRIVER(hook,401p)       //Data East MPU: 11/91 Hook (4.01 with Prototype Sound)
 DRIVER(hook,401)        //Data East MPU: 01/92 Hook (4.01)
 DRIVER(hook,404)        //Data East MPU: 01/92 Hook (4.04)
@@ -1348,13 +1349,14 @@ DRIVERNV(cue)           //MPU-200: ??/82 Cue (Proto - Never released)
 DRIVERNV(blbeauty)      //MPU-200: 09/84 Black Beauty (Shuffle)
 DRIVERNV(lazrlord)      //MPU-200: 10/84 Lazer Lord (Proto - Never released)
 // Whitestar System
-DRIVERNV(strikext)      //Whitestar: 03/00 Striker Extreme (1.02)
+DRIVERNV(strikext)      //Whitestar: 05/00 Striker Extreme (1.02)
 DRIVERNV(strxt_uk)      //Whitestar: 03/00 Striker Extreme (1.01 English)
-DRIVERNV(strxt_gr)      //Whitestar: 03/00 Striker Extreme (1.03 German)
-DRIVERNV(strxt_sp)      //Whitestar: 03/00 Striker Extreme (1.02 Spanish)
-DRIVERNV(strxt_fr)      //Whitestar: 03/00 Striker Extreme (1.02 French)
-DRIVERNV(strxt_it_101)  //Whitestar: ??/00 Striker Extreme (1.01 Italian)
-DRIVERNV(strxt_it)      //Whitestar: 03/00 Striker Extreme (1.02 Italian)
+DRIVERNV(strxt_gr)      //Whitestar: 07/00 Striker Extreme (1.03 German)
+DRIVERNV(strxt_sp)      //Whitestar: 05/00 Striker Extreme (1.02 Spanish)
+DRIVERNV(strxt_fr)      //Whitestar: 05/00 Striker Extreme (1.02 French)
+DRIVERNV(strxt_it_100)  //Whitestar: 03/00 Striker Extreme (1.00 Italian)
+DRIVERNV(strxt_it_101)  //Whitestar: 03/00 Striker Extreme (1.01 Italian)
+DRIVERNV(strxt_it)      //Whitestar: 05/00 Striker Extreme (1.02 Italian)
 DRIVERNV(shrkysht)      //Whitestar: 09/00 Sharkey's Shootout (2.11)
 DRIVERNV(shrky_gr)      //Whitestar: 09/00 Sharkey's Shootout (2.11 German)
 DRIVERNV(shrky_fr)      //Whitestar: 09/00 Sharkey's Shootout (2.11 French)
@@ -1757,11 +1759,12 @@ DRIVER(fg,1200af)       //S.A.M.: 01/08 Family Guy - V12.0 (English, French)
 DRIVER(fg,1200ag)       //S.A.M.: 01/08 Family Guy - V12.0 (English, German)
 DRIVER(fg,1200ai)       //S.A.M.: 01/08 Family Guy - V12.0 (English, Italian)
 DRIVER(fg,1200al)       //S.A.M.: 01/08 Family Guy - V12.0 (English, Spanish)
+DRIVER(sman,102af)      //S.A.M.: 05/07 Spider-Man - V1.02 (English, French)
 DRIVER(sman,130af)      //S.A.M.: 06/07 Spider-Man - V1.30 (English, French)
 DRIVER(sman,130ai)      //S.A.M.: 06/07 Spider-Man - V1.30 (English, Italian)
 DRIVER(sman,130al)      //S.A.M.: 06/07 Spider-Man - V1.30 (English, Spanish)
 DRIVER(sman,130gf)      //S.A.M.: 06/07 Spider-Man - V1.30 (German, French)
-DRIVER(sman,132)        //S.A.M.: ??/07 Spider-Man - V1.32
+DRIVER(sman,132)        //S.A.M.: 06/07 Spider-Man - V1.32
 DRIVER(sman,140)        //S.A.M.: ??/07 Spider-Man - V1.4
 DRIVER(sman,140af)      //S.A.M.: ??/07 Spider-Man - V1.4 (English, French)
 DRIVER(sman,140ai)      //S.A.M.: ??/07 Spider-Man - V1.4 (English, Italian)
@@ -1921,6 +1924,8 @@ DRIVER(im,181)          //S.A.M.: 07/14 Iron Man - V1.81
 DRIVER(im,182)          //S.A.M.: 07/14 Iron Man - V1.82
 DRIVER(im,183)          //S.A.M.: 08/14 Iron Man - V1.83
 DRIVER(im,183ve)        //S.A.M.: 08/14 Iron Man - V1.83 Vault Edition
+DRIVER(im, 185)          //S.A.M.: 03/20 Iron Man - V1.85
+DRIVER(im, 185ve)        //S.A.M.: 03/20 Iron Man - V1.85 Vault Edition
 //DRIVER(avr,100)         //S.A.M.: 08/10 Avatar - V1.00
 //DRIVER(avr,100h)        //S.A.M.: 12/10 Avatar - V1.00 Limited Edition
 //DRIVER(avr,101)         //S.A.M.: 08/10 Avatar - V1.01
@@ -2689,6 +2694,7 @@ DRIVER(tz,ifpa)         //          05/93 B Twilight Zone (IFPA)
 DRIVER(tz,ifpa2)        //                  Twilight Zone (IFPA) LED Ghost Fix
 DRIVER(tz,l4)           //          06/93 B Twilight Zone (L-4)
 DRIVER(tz,d4)           //                  Twilight Zone (D-4) LED Ghost Fix
+DRIVER(tz,l5)           //          08/93 B Twilight Zone (L-5)
 DRIVER(tz,h7)           //          10/94 B Twilight Zone (H-7)
 DRIVER(tz,i7)           //                  Twilight Zone (I-7) LED Ghost Fix
 DRIVER(tz,h8)           //          11/94 B Twilight Zone (H-8)
@@ -2950,7 +2956,8 @@ DRIVER(mm,10pfx)        //          10/18 W Medieval Madness (1.0 Pinball FX)
 DRIVER(mm,109)          //          06/99 W Medieval Madness (1.09 Home version)
 DRIVER(mm,109b)         //                  Medieval Madness (1.09B Home version Coin Play)
 DRIVER(mm,109c)         //                  Medieval Madness (1.09C Home version w/ profanity speech)
-DRIVER(cv,10)           //WPC-562:  10/97 B Cirqus Voltaire (1.0)
+DRIVER(cv,d52)          //WPC-562:  08/97 B Cirqus Voltaire (D.52 Prototype w/ support for old Ringmaster voice)
+DRIVER(cv,10)           //          10/97 B Cirqus Voltaire (1.0)
 DRIVER(cv,11)           //          11/97 B Cirqus Voltaire (1.1)
 DRIVER(cv,13)           //          04/98 B Cirqus Voltaire (1.3)
 DRIVER(cv,14)           //          10/98 B Cirqus Voltaire (1.4)

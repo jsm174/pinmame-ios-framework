@@ -332,7 +332,7 @@ static MEMORY_WRITE_START(sns_writemem)
 MEMORY_END
 
 static MACHINE_DRIVER_START(zac1370_nosound)
-  MDRV_CPU_ADD(M6802, 3579545/4)
+  MDRV_CPU_ADD(M6802, 3579545./4.)
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(sns_readmem, sns_writemem)
 MACHINE_DRIVER_END
@@ -411,8 +411,8 @@ static void initTMS(void) {
   tms5220_reset();
   if (core_gameData->hw.soundBoard == SNDBRD_ZAC1370
     || core_gameData->hw.soundBoard == SNDBRD_ZAC11178
-    || !_strnicmp(Machine->gamedrv->name, "tmac", 4)
-    || !_strnicmp(Machine->gamedrv->name, "zankor", 6)) {
+    || !strncasecmp(Machine->gamedrv->name, "tmac", 4)
+    || !strncasecmp(Machine->gamedrv->name, "zankor", 6)) {
     // Pinball Champ ('82), Soccer Kings, Time Machine, Pool Champion, Black Belt, Mexico 86, Zankor
     tms5220_set_variant(TMS5220_IS_5200);
   } else {
@@ -754,7 +754,7 @@ static MEMORY_WRITE_START(sns3_writemem)
 MEMORY_END
 
 MACHINE_DRIVER_START(zac11178)
-  MDRV_CPU_ADD(M6802, 3579545/4)
+  MDRV_CPU_ADD(M6802, 3579545./4.)
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(sns3_readmem, sns3_writemem)
   MDRV_CPU_PERIODIC_INT(sns3_irq, SNS_11178_IRQFREQ)

@@ -1,15 +1,12 @@
+// license:BSD-3-Clause
+
 #ifndef MIXER_H
 #define MIXER_H
 #if !defined(__GNUC__) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || (__GNUC__ >= 4)	// GCC supports "pragma once" correctly since 3.4
 #pragma once
 #endif
 
-#ifdef PINMAME
-/* PinMAME needs 17 channels for some games with SC-01 support. */
 #define MIXER_MAX_CHANNELS 25
-#else
-#define MIXER_MAX_CHANNELS 16
-#endif
 
 /*
   When you allocate a channel, you pass a default mixing level setting.
@@ -59,9 +56,6 @@
 
 */
 
-
-
-
 #define MIXER_PAN_CENTER  0
 #define MIXER_PAN_LEFT    1
 #define MIXER_PAN_RIGHT   2
@@ -80,10 +74,12 @@
 int mixer_sh_start(void);
 void mixer_sh_stop(void);
 void mixer_sh_update(void);
-int mixer_allocate_channel(int default_mixing_level);
-int mixer_allocate_channels(int channels,const int *default_mixing_levels);
-void mixer_set_name(int channel,const char *name);
-const char *mixer_get_name(int channel);
+int mixer_allocate_channel(const int default_mixing_level);
+int mixer_allocate_channels(const int channels,const int *default_mixing_levels);
+int mixer_allocate_channel_float(const int default_mixing_level, const UINT8 is_float);
+int mixer_allocate_channels_float(const int channels, const int *default_mixing_levels, const UINT8 is_float);
+void mixer_set_name(const int channel, const char *name);
+const char *mixer_get_name(const int channel);
 
 /*
   This function sets the volume of a channel. This is *NOT* the mixing level,
@@ -92,24 +88,23 @@ const char *mixer_get_name(int channel);
   external circuitry which can alter the volume of the sound source, you can
   use this function to emulate that.
 */
-void mixer_set_volume(int channel,int volume);
+void mixer_set_volume(const int channel, const int volume);
 
-void mixer_play_sample(int channel,INT8 *data,int len,int freq,int loop);
-void mixer_play_sample_16(int channel,INT16 *data,int len,int freq,int loop);
-void mixer_stop_sample(int channel);
-int mixer_is_sample_playing(int channel);
-void mixer_set_sample_frequency(int channel,int freq);
-void mixer_sound_enable_global_w(int enable);
+void mixer_play_sample(const int channel, INT8 *data, const int len, const int freq, const UINT8 loop);
+void mixer_play_sample_16(const int channel, INT16 *data, const int len, const int freq, const UINT8 loop);
+void mixer_stop_sample(const int channel);
+int mixer_is_sample_playing(const int channel);
+void mixer_set_sample_frequency(const int channel, const int freq);
+void mixer_sound_enable_global_w(const UINT8 enable);
 
-void mixer_play_streamed_sample_16(int channel,INT16 *data,int len,int freq);
+void mixer_play_streamed_sample_16(const int channel, INT16 *data, int len, const int freq);
 int mixer_samples_this_frame(void);
-int mixer_need_samples_this_frame(int channel,int freq);
-void mixer_set_lowpass_frequency(int ch, int freq);
+int mixer_need_samples_this_frame(const int channel, const int freq);
 
 /* private functions for user interface only - don't call them from drivers! */
-void mixer_set_mixing_level(int channel,int level);
-int mixer_get_mixing_level(int channel);
-int mixer_get_default_mixing_level(int channel);
+void mixer_set_mixing_level(const int channel,const int level);
+int mixer_get_mixing_level(const int channel);
+int mixer_get_default_mixing_level(const int channel);
 
 /* configuration functions */
 
@@ -124,12 +119,10 @@ void mixer_save_config(struct mixer_config *config);
 void mixer_read_config(mame_file *f);
 void mixer_write_config(mame_file *f);
 
-void mixer_set_stereo_volume(int ch, int l_vol, int r_vol );
+void mixer_set_stereo_volume(const int ch, const int l_vol, const int r_vol);
 
-#ifdef PINMAME
-void mixer_set_reverb_filter(int ch, float delay, float force);
-#endif
+void mixer_set_reverb_filter(const int ch, const float delay, const float force);
 
-void mixer_set_channel_legacy_resample(int ch, int enable);
+void mixer_set_channel_legacy_resample(const int ch, const UINT8 enable);
 
 #endif

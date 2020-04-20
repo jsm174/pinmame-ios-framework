@@ -68,9 +68,9 @@
 #define Z80_NMI 127
 
 //Jumper on board shows 200Hz hard wired - 6Mhz clock feeds 74393 as / 16 -> 4040 to Q11 as / 2048 = ~183Hz
-#define MRGAME_IRQ_FREQ (6000000/16)/2048
+#define MRGAME_IRQ_FREQ (6000000./16.)/2048.
 //Jumper on sound board shows 60Hz hard wired - 4Mhz clock feeds 74393 as /16 -> 4040 to Q12 as / 4096 = ~61Hz
-#define MRGAME_SIRQ_FREQ (4000000/16)/4096
+#define MRGAME_SIRQ_FREQ (4000000./16.)/4096.
 
 #if 0
 #define LOG(x) printf x
@@ -1077,7 +1077,7 @@ MACHINE_DRIVER_END
 
 /* VIDEO GENERATION 1 DRIVER */
 MACHINE_DRIVER_START(mrgame_vid1)
-  MDRV_CPU_ADD(Z80,3000000)		/* 3 MHz */
+  MDRV_CPU_ADD(Z80, 3000000)		/* 3 MHz */
   MDRV_CPU_MEMORY(videog1_readmem, videog1_writemem)
   MDRV_CPU_VBLANK_INT(nmi_line_pulse,1)
   MDRV_FRAMES_PER_SECOND(60)

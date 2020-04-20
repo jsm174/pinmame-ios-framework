@@ -46,7 +46,6 @@ extern unsigned int coinlockedout[COIN_COUNTERS];
 #ifndef MESS
 #ifndef TINY_COMPILE
 #ifndef CPSMAME
-#ifndef MMSND
 int 		memcard_menu(struct mame_bitmap *bitmap, int);
 extern int	mcd_action;
 extern int	mcd_number;
@@ -54,7 +53,6 @@ extern int	memcard_status;
 extern int	memcard_number;
 extern int	memcard_manager;
 extern struct GameDriver driver_neogeo;
-#endif
 #endif
 #endif
 #endif
@@ -2390,17 +2388,18 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 	i = 0;
 	while (i < MAX_CPU && Machine->drv->cpu[i].cpu_type)
 	{
-
-		if (Machine->drv->cpu[i].cpu_clock >= 1000000)
-			sprintf(&buf[strlen(buf)],"%s %d.%06d MHz",
+		if (Machine->drv->cpu[i].cpu_clock >= 1000000000)
+			sprintf(&buf[strlen(buf)],"%s %3.09lf GHz",
 					cputype_name(Machine->drv->cpu[i].cpu_type),
-					Machine->drv->cpu[i].cpu_clock / 1000000,
-					Machine->drv->cpu[i].cpu_clock % 1000000);
+					Machine->drv->cpu[i].cpu_clock / 1000000000.);
+		else if (Machine->drv->cpu[i].cpu_clock >= 1000000)
+			sprintf(&buf[strlen(buf)],"%s %3.06lf MHz",
+					cputype_name(Machine->drv->cpu[i].cpu_type),
+					Machine->drv->cpu[i].cpu_clock / 1000000.);
 		else
-			sprintf(&buf[strlen(buf)],"%s %d.%03d kHz",
+			sprintf(&buf[strlen(buf)],"%s %3.03lf kHz",
 					cputype_name(Machine->drv->cpu[i].cpu_type),
-					Machine->drv->cpu[i].cpu_clock / 1000,
-					Machine->drv->cpu[i].cpu_clock % 1000);
+					Machine->drv->cpu[i].cpu_clock / 1000.);
 
 		if (Machine->drv->cpu[i].cpu_flags & CPU_AUDIO_CPU)
 		{
@@ -2986,7 +2985,6 @@ static int displayhistory (struct mame_bitmap *bitmap, int selected)
 #ifndef MESS
 #ifndef TINY_COMPILE
 #ifndef CPSMAME
-#ifndef MMSND
 int memcard_menu(struct mame_bitmap *bitmap, int selection)
 {
 	int sel;
@@ -3117,7 +3115,6 @@ int memcard_menu(struct mame_bitmap *bitmap, int selection)
 #endif
 #endif
 #endif
-#endif
 
 
 #ifndef MESS
@@ -3231,14 +3228,12 @@ static void setup_menu_init(void)
 #ifndef MESS
 #ifndef TINY_COMPILE
 #ifndef CPSMAME
-#ifndef MMSND
 	if (Machine->gamedrv->clone_of == &driver_neogeo ||
 			(Machine->gamedrv->clone_of &&
 				Machine->gamedrv->clone_of->clone_of == &driver_neogeo))
 	{
 		menu_item[menu_total] = ui_getstring (UI_memorycard); menu_action[menu_total++] = UI_MEMCARD;
 	}
-#endif
 #endif
 #endif
 #endif
@@ -3313,11 +3308,9 @@ static int setup_menu(struct mame_bitmap *bitmap, int selected)
 #ifndef MESS
 #ifndef TINY_COMPILE
 #ifndef CPSMAME
-#ifndef MMSND
 			case UI_MEMCARD:
 				res = memcard_menu(bitmap, sel >> SEL_BITS);
 				break;
-#endif
 #endif
 #endif
 #endif
@@ -3563,7 +3556,7 @@ static void onscrd_mixervol(struct mame_bitmap *bitmap,int increment,int arg)
 			{
 				if (mixer_get_name(ch) != 0)
 				{
-					volume = ratio * old_vol[ch];
+					volume = (int)(ratio * old_vol[ch]);
 					if (volume < 0 || volume > 100)
 						overflow = 1;
 				}
@@ -3573,7 +3566,7 @@ static void onscrd_mixervol(struct mame_bitmap *bitmap,int increment,int arg)
 			{
 				for (ch = 0; ch < MIXER_MAX_CHANNELS; ch++)
 				{
-					volume = ratio * old_vol[ch];
+					volume = (int)(ratio * old_vol[ch]);
 					mixer_set_mixing_level(ch,volume);
 				}
 			}
@@ -3717,7 +3710,7 @@ static void onscrd_overclock(struct mame_bitmap *bitmap,int increment,int arg)
 			timer_set_overclock(arg, overclock);
 	}
 
-	oc = 100 * timer_get_overclock(arg) + 0.5;
+	oc = (int)(100. * timer_get_overclock(arg) + 0.5);
 
 	if( doallcpus )
 		sprintf(buf,"%s %s %3d%%", ui_getstring (UI_allcpus), ui_getstring (UI_overclock), oc);
@@ -3893,7 +3886,7 @@ void CLIB_DECL usrintf_showmessage(const char *text,...)
 	va_start(arg,text);
 	vsprintf(messagetext,text,arg);
 	va_end(arg);
-	messagecounter = 2 * Machine->drv->frames_per_second;
+	messagecounter = (int)(2. * Machine->drv->frames_per_second);
 }
 
 void CLIB_DECL usrintf_showmessage_secs(int seconds, const char *text,...)
@@ -3902,7 +3895,7 @@ void CLIB_DECL usrintf_showmessage_secs(int seconds, const char *text,...)
 	va_start(arg,text);
 	vsprintf(messagetext,text,arg);
 	va_end(arg);
-	messagecounter = seconds * Machine->drv->frames_per_second;
+	messagecounter = (int)((double)seconds * Machine->drv->frames_per_second);
 }
 
 void do_loadsave(struct mame_bitmap *bitmap, int request_loadsave)

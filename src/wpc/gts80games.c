@@ -816,7 +816,7 @@ GTS80_1_ROMSTART ("685.cpu",   CRC(4754d68d) SHA1(2af743287c1a021f3e130d3d6e191e
 GTS80S2K_ROMSTART("685-s.snd", CRC(d4219987) SHA1(7385d8723bdc937e7c9d6bf7f26ca06f64a9a212))
 GTS80_ROMEND
 #define input_ports_rackemup input_ports_gts80
-CORE_CLONEDEFNV(rackemup,gts80as,"Rack 'Em Up",1983,"Gottlieb",gl_mGTS80S,0)
+CORE_CLONEDEFNV(rackemup,gts80as,"Rack 'Em Up",1983,"Gottlieb",gl_mGTS80SP,0)
 
 /*-------------------------------------------------------------------
 / Ready...Aim...Fire! (#686)
@@ -826,7 +826,7 @@ GTS80_1_ROMSTART ("686.cpu",   CRC(d1e7a0de) SHA1(b9af2fcaadc55d37c7d9d22621c381
 GTS80S2K_ROMSTART("686-s.snd", CRC(09740682) SHA1(4f36d78207bd5b8e7abb7118f03acbb3885173c2))
 GTS80_ROMEND
 #define input_ports_raimfire input_ports_gts80
-CORE_CLONEDEFNV(raimfire,gts80as,"Ready...Aim...Fire!",1983,"Gottlieb",gl_mGTS80S,0)
+CORE_CLONEDEFNV(raimfire,gts80as,"Ready...Aim...Fire!",1983,"Gottlieb",gl_mGTS80SP,0)
 
 /*-------------------------------------------------------------------
 / Jacks To Open (#687)
@@ -836,7 +836,7 @@ GTS80_1_ROMSTART ("687.cpu",   CRC(0080565e) SHA1(c08412ba24d2ffccf11431e80bd2fc
 GTS80S2K_ROMSTART("687-s.snd", CRC(f9d10b7a) SHA1(db255711ed6cb46d183c0ae3894df447f3d8a8e3))
 GTS80_ROMEND
 #define input_ports_jack2opn input_ports_gts80
-CORE_CLONEDEFNV(jack2opn,gts80as,"Jacks to Open",1984,"Gottlieb",gl_mGTS80S,0)
+CORE_CLONEDEFNV(jack2opn,gts80as,"Jacks to Open",1984,"Gottlieb",gl_mGTS80SP,0)
 
 /*-------------------------------------------------------------------
 / Alien Star (#689)
@@ -846,7 +846,7 @@ GTS80_1_ROMSTART ("689a.cpu",  CRC(4262006b) SHA1(66520b66c31efd0dc654630b2d3567
 GTS80S2K_ROMSTART("689-s.snd", CRC(e1e7a610) SHA1(d4eddfc970127cf3a7d086ad46cbc7b95fdc269d))
 GTS80_ROMEND
 #define input_ports_alienstr input_ports_gts80
-CORE_CLONEDEFNV(alienstr,gts80as,"Alien Star",1984,"Gottlieb",gl_mGTS80S,0)
+CORE_CLONEDEFNV(alienstr,gts80as,"Alien Star",1984,"Gottlieb",gl_mGTS80SP,0)
 
 /*-------------------------------------------------------------------
 / The Games (#691)
@@ -856,7 +856,7 @@ GTS80_1_ROMSTART ("691.cpu",   CRC(50f620ea) SHA1(2f997a637eba4eb362586d3aa8caac
 GTS80S2K_ROMSTART("691-s.snd", CRC(d7011a31) SHA1(edf5de6cf5ddc1eb577dd1d8dcc9201522df8315))
 GTS80_ROMEND
 #define input_ports_thegames input_ports_gts80
-CORE_CLONEDEFNV(thegames,gts80as,"Games, The",1984,"Gottlieb",gl_mGTS80S,0)
+CORE_CLONEDEFNV(thegames,gts80as,"Games, The",1984,"Gottlieb",gl_mGTS80SP,0)
 
 /*-------------------------------------------------------------------
 / Touchdown (#688)
@@ -866,7 +866,7 @@ GTS80_1_ROMSTART ("688.cpu",   CRC(e531ab3f) SHA1(695aef0dd911fee27ac2d1493a9646
 GTS80S2K_ROMSTART("688-s.snd", CRC(5e9988a6) SHA1(5f531491722d3c30cf4a7c17982813a7c548387a))
 GTS80_ROMEND
 #define input_ports_touchdn input_ports_gts80
-CORE_CLONEDEFNV(touchdn,gts80as,"Touchdown",1984,"Gottlieb",gl_mGTS80S,0)
+CORE_CLONEDEFNV(touchdn,gts80as,"Touchdown",1984,"Gottlieb",gl_mGTS80SP,0)
 
 /*-------------------------------------------------------------------
 / El Dorado City of Gold (#692)
@@ -876,7 +876,7 @@ GTS80_1_ROMSTART ("692-2.cpu", CRC(4ee6d09b) SHA1(5da0556204e76029380366f9fbb566
 GTS80S2K_ROMSTART("692-s.snd", CRC(9bfbf400) SHA1(58aed9c0b1f52bcd0b53edcdf7af576bb175e3d6))
 GTS80_ROMEND
 #define input_ports_eldorado input_ports_gts80
-CORE_CLONEDEFNV(eldorado,gts80as,"El Dorado City of Gold",1984,"Gottlieb",gl_mGTS80S,0)
+CORE_CLONEDEFNV(eldorado,gts80as,"El Dorado City of Gold",1984,"Gottlieb",gl_mGTS80SP,0)
 
 /*-------------------------------------------------------------------
 / Ice Fever (#695)
@@ -886,7 +886,7 @@ GTS80_1_ROMSTART ("695.cpu",   CRC(2f6e9caf) SHA1(4f9eeafcbaf758ee6bbad74611b491
 GTS80S2K_ROMSTART("695-s.snd", CRC(daededc2) SHA1(b43303c1e39b21f3fcbc339d440ea051ced1ea26))
 GTS80_ROMEND
 #define input_ports_icefever input_ports_gts80
-CORE_CLONEDEFNV(icefever,gts80as,"Ice Fever",1985,"Gottlieb",gl_mGTS80S,0)
+CORE_CLONEDEFNV(icefever,gts80as,"Ice Fever",1985,"Gottlieb",gl_mGTS80SP,0)
 
 // System 80b
 

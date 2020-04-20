@@ -80,10 +80,6 @@
 #include "network.h"
 #endif /* MAME_NET */
 
-#ifdef MMSND
-#include "mmsnd/mmsnd.h"
-#endif
-
 #ifdef PINMAME
 typedef struct {
   int dmd_red, dmd_green, dmd_blue;
@@ -115,13 +111,13 @@ struct pinMachine {
   int (*m2lamp)(int col, int row);
   struct {
     void (*callback)(int);
-    int  rate;
+    double rate;
   } timers[5];
   void (*init)(void);
   void (*reset)(void);
   void (*stop)(void);
 };
-extern void machine_add_timer(struct InternalMachineDriver *machine, void (*func)(int), int rate);
+extern void machine_add_timer(struct InternalMachineDriver *machine, void (*func)(int), double rate);
 #define DIAGLED_VERTICAL        0x100   /* Flag indicated DIAG LEDS are Vertically Positioned */
 #define MDRV_DIPS(no) \
   machine->pinmame.coreDips = (no);
@@ -339,7 +335,7 @@ extern void machine_add_timer(struct InternalMachineDriver *machine, void (*func
         }                                                                                                                                       \
 
 
-struct MachineCPU *machine_add_cpu(struct InternalMachineDriver *machine, const char *tag, int type, int cpuclock);
+struct MachineCPU *machine_add_cpu(struct InternalMachineDriver *machine, const char *tag, int type, double cpuclock);
 struct MachineCPU *machine_find_cpu(struct InternalMachineDriver *machine, const char *tag);
 void machine_remove_cpu(struct InternalMachineDriver *machine, const char *tag);
 

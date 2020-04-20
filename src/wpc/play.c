@@ -55,6 +55,8 @@ The IOS board common to all games provides sound effects through the CDP1863.
 #include "sndbrd.h"
 #include "cpu/cdp1802/cdp1802.h"
 
+//#define VERBOSE_OUTPUT
+
 enum { DISPCOL=1, DISPLAY, SOUND, SWITCH, DIAG, LAMPCOL, LAMP };
 
 /*----------------
@@ -295,8 +297,10 @@ static READ_HANDLER(in2_n) {
     case SWITCH:
       if (locals.digitSel < 6)
         return coreGlobals.swMatrix[locals.digitSel+2];
+#ifdef VERBOSE_OUTPUT
       else
         printf("digitSel = %d!\n", locals.digitSel);
+#endif
       break;
     case DIAG:
       if (locals.cpuType > 1) {
@@ -361,7 +365,7 @@ static WRITE_HANDLER(m8020_w) {
 
 static MACHINE_INIT(PLAYMATIC3) {
   init_common(2);
-  if (!_strnicmp(Machine->gamedrv->name, "spain82", 7)) {
+  if (!strncasecmp(Machine->gamedrv->name, "spain82", 7)) {
     install_mem_write_handler(0, 0x8020, 0x8020, m8020_w);
   }
 }
@@ -464,7 +468,7 @@ static MACHINE_DRIVER_START(PLAYMATIC2NS)
   MDRV_CPU_MEMORY(PLAYMATIC_readmem2, PLAYMATIC_writemem2)
   MDRV_CPU_PORTS(PLAYMATIC_readport2, PLAYMATIC_writeport2)
   MDRV_CPU_CONFIG(play1802_config)
-  MDRV_CPU_PERIODIC_INT(PLAYMATIC_irq2, 2950000/8192)
+  MDRV_CPU_PERIODIC_INT(PLAYMATIC_irq2, 2950000/8192.)
   MDRV_TIMER_ADD(PLAYMATIC_zeroCross2, 100)
   MDRV_CPU_VBLANK_INT(PLAYMATIC_vblank2, 1)
   MDRV_CORE_INIT_RESET_STOP(PLAYMATIC2,NULL,PLAYMATIC)
@@ -514,7 +518,7 @@ MACHINE_DRIVER_START(PLAYMATIC4)
   MDRV_IMPORT_FROM(PLAYMATIC3)
   MDRV_CORE_INIT_RESET_STOP(PLAYMATIC4,NULL,PLAYMATIC)
   MDRV_CPU_REPLACE("mcpu", CDP1802, 3579545)
-  MDRV_CPU_PERIODIC_INT(PLAYMATIC_irq2, 3579545/8192)
+  MDRV_CPU_PERIODIC_INT(PLAYMATIC_irq2, 3579545/8192.)
   MDRV_IMPORT_FROM(PLAYMATICS4)
 MACHINE_DRIVER_END
 
@@ -523,7 +527,7 @@ MACHINE_DRIVER_START(PLAYMATIC4SZSU)
   MDRV_IMPORT_FROM(PLAYMATIC3)
   MDRV_CORE_INIT_RESET_STOP(PLAYMATIC4,NULL,PLAYMATIC)
   MDRV_CPU_REPLACE("mcpu", CDP1802, 3579545)
-  MDRV_CPU_PERIODIC_INT(PLAYMATIC_irq2, 3579545/8192)
+  MDRV_CPU_PERIODIC_INT(PLAYMATIC_irq2, 3579545/8192.)
   MDRV_IMPORT_FROM(ZSU)
 MACHINE_DRIVER_END
 
@@ -561,7 +565,9 @@ static READ_HANDLER(in_bingo) {
     case 2:
       return ~coreGlobals.swMatrix[1 + bitColToNum(locals.lampCol & 0x1f)];
     default:
+#ifdef VERBOSE_OUTPUT
       printf("unknown in %d\n", offset);
+#endif
       return 0;
   }
 }
@@ -579,7 +585,10 @@ static WRITE_HANDLER(out_bingo) {
       coreGlobals.tmpLampMatrix[0] = data;
       break;
     default:
+#ifdef VERBOSE_OUTPUT
       printf("%d:%02x ", offset, data);
+#endif
+      break;
   }
 }
 
@@ -597,7 +606,7 @@ MACHINE_DRIVER_START(PLAYMATICBINGO)
   MDRV_CPU_MEMORY(PLAYMATIC_readmem3, PLAYMATIC_writemem3)
   MDRV_CPU_PORTS(PLAYMATIC_readportBingo, PLAYMATIC_writeportBingo)
   MDRV_CPU_CONFIG(play1802_config)
-  MDRV_CPU_PERIODIC_INT(PLAYMATIC_irqBingo, 3579545/8192)
+  MDRV_CPU_PERIODIC_INT(PLAYMATIC_irqBingo, 3579545/8192.)
   MDRV_TIMER_ADD(PLAYMATIC_zeroCrossBingo, 100)
   MDRV_CPU_VBLANK_INT(PLAYMATIC_vblank2, 1)
   MDRV_CORE_INIT_RESET_STOP(PLAYMATICBINGO,NULL,PLAYMATIC)

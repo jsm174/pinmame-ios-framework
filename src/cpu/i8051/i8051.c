@@ -187,7 +187,7 @@ static I8051_UART uart;
 
 /* Layout of the registers in the debugger (-1 = end of a line, 0 = end of layout) */
 static UINT8 i8051_reg_layout[] = {
-	I8051_PC, I8051_SP, I8051_PSW, I8051_ACC, I8051_B, I8051_DPH, I8051_DPL, I8051_IE, -1,
+	I8051_PC, I8051_SP, I8051_PSW, I8051_ACC, I8051_B, I8051_DPH, I8051_DPL, I8051_IE, 0xFF,
 	I8051_R0, I8051_R1, I8051_R2, I8051_R3, I8051_R4, I8051_R5, I8051_R6, I8051_R7, I8051_RB, 0
 };
 
@@ -421,9 +421,7 @@ static READ32_HANDLER((*hold_eram_iaddr_callback));
 #define V_TF1	0x01b	/* Timer 1 Overflow */
 #define V_RITI	0x023	/* Serial Receive/Transmit */
 
-#if (HAS_I8052 || HAS_I8752)
 #define V_TF2	0x02b	/* Timer 2 Overflow */
-#endif
 
 /* Any pending IRQ */
 #define SERIALPORT_IRQ    ((R_SCON & 0x03) && GET_ES)
@@ -1641,7 +1639,7 @@ const char *i8051_info(void *context, int regnum)
 {
 	static char buffer[19][20];
 	static int which = 0;
-	I8051 *r = context;
+	I8051 *r = (I8051*)context;
 
 	which = (which+1) % 19;
 	buffer[which][0] = '\0';
@@ -1919,7 +1917,7 @@ INLINE void push_pc()
 	UINT8 tmpSP = R_SP;							//Grab and Increment Stack Pointer
 	tmpSP++;									// ""
 	SFR_W(SP,tmpSP);							// ""
-    if (tmpSP == R_SP)							//Ensure it was able to write to new stack location
+	if (tmpSP == R_SP)							//Ensure it was able to write to new stack location
 		IRAM_IW(tmpSP, (PC & 0xff));			//Store low byte of PC to Internal Ram (Use IRAM_IW to store stack above 128 bytes)
 	tmpSP = R_SP;								//Increment Stack Pointer
 	tmpSP++;									// ""
@@ -2314,7 +2312,7 @@ INLINE void serial_transmit(UINT8 data)
 }
 
 //Check and update status of serial port
-INLINE void	update_serial(int cyc)
+INLINE void update_serial(int cyc)
 {
 	//Any bits left to send?
 	if(uart.bits_to_send) {

@@ -184,7 +184,7 @@ extern const core_tLCDLayout wpc_dispDMD[];
 #define WPC_ALPHA1LO      (0x3fed - WPC_BASE) /* x      W: Display 1st row lo bits */
 #define WPC_EXTBOARD4     (0x3fee - WPC_BASE) /*   x    W: Extension Driver Board 4 */
 #define WPC_FLIPPERCOIL95 (0x3fee - WPC_BASE) /*      x W: Flipper Solenoids */
-#define WPC_ALPHA2HI      (0x3fee - WPC_BASE) /* x      W: Display 2nd row hi bits */
+#define WPC_ALPHA2HI      (0x3fef - WPC_BASE) /* x      W: Display 2nd row hi bits */
 #define WPC_ALPHA2LO      (0x3fee - WPC_BASE) /* x      W:           b 2nd row lo bits */
 #define WPC_EXTBOARD5     (0x3fef - WPC_BASE) /*   x    W: Extension Driver Board 5 */
 #define WPC_FLIPPERSW95   (0x3fef - WPC_BASE) /*      x R: Flipper switches */
@@ -201,8 +201,6 @@ extern const core_tLCDLayout wpc_dispDMD[];
 #define WPC_PROTMEM       (0x3ffd - WPC_BASE) /* xxxxxx W: enabled/disable protected memory */
 #define WPC_PROTMEMCTRL   (0x3ffe - WPC_BASE) /* xxxxxx W: Set protected memory area */
 #define WPC_WATCHDOG      (0x3fff - WPC_BASE) /* xxxxxx W: Watchdog */
-
-#define WPC_VBLANKFREQ    60 /* VBLANK frequency */
 
 /*-- the internal state of the WPC chip. Should only be used in memory handlers --*/
 extern UINT8 *wpc_data;

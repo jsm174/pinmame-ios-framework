@@ -1,10 +1,12 @@
+// license:BSD-3-Clause
+
 #include "filter.h"
 
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 
-#if defined(SSE_FILTER_OPT) && !defined(FILTER_USE_INT)
+#if defined(SSE_FILTER_OPT)
  #include <xmmintrin.h>
  #if !defined(_MSC_VER) || !defined(_WIN32) || defined(__clang__)
      typedef union __attribute__ ((aligned (16))) Windows__m128
@@ -17,7 +19,7 @@
  #endif
 #endif
 
-static filter* filter_alloc() {
+static filter* filter_alloc(void) {
 	filter* f = malloc(sizeof(filter));
 	return f;
 }
@@ -29,13 +31,12 @@ void filter_free(filter* f) {
 void filter_state_reset(filter* f, filter_state* s) {
 	unsigned int i;
 	s->prev_mac = 0;
-	for(i=0;i<f->order;++i) {
+	for(i=0;i<f->order;++i)
 		s->xprev[i] = 0;
-	}
 }
 
-filter_state* filter_state_alloc() {
-	int i;
+filter_state* filter_state_alloc(void) {
+	unsigned int i;
 	filter_state* s = malloc(sizeof(filter_state));
 	s->prev_mac = 0;
 	for(i=0;i<FILTER_ORDER_MAX;++i)
@@ -50,7 +51,7 @@ void filter_state_free(filter_state* s) {
 /****************************************************************************/
 /* FIR */
 
-#if defined(SSE_FILTER_OPT) && !defined(FILTER_USE_INT)
+#if defined(SSE_FILTER_OPT)
 INLINE __m128 horizontal_add(const __m128 a)
 {
 #if 0 //!! needs SSE3
@@ -63,21 +64,17 @@ INLINE __m128 horizontal_add(const __m128 a)
 }
 #endif
 
-filter_real filter_compute(const filter* f, const filter_state* s) {
-	const filter_real * const __restrict xcoeffs = f->xcoeffs;
-	const filter_real * const __restrict xprev = s->xprev;
+float filter_compute(const filter* f, const filter_state* s) {
+	const float * const __restrict xcoeffs = f->xcoeffs;
+	const float * const __restrict xprev = s->xprev;
 
 	const int order = f->order;
 	const int midorder = f->order / 2;
-#ifdef FILTER_USE_INT
-	filter_real //!! long long??! -> not needed, as long as signal is balanced around 0 and/or number of coefficients low (i guess, at least for random values this works with plain int!)
-#else
- #ifdef SSE_FILTER_OPT
+#ifdef SSE_FILTER_OPT
 	__m128 y128;
 	float
- #else
+#else
 	double
- #endif
 #endif
 	y = 0;
 	int i,j,k;
@@ -92,7 +89,7 @@ filter_real filter_compute(const filter* f, const filter_state* s) {
 	/* x */
 	k = 0;
 
-#if defined(SSE_FILTER_OPT) && !defined(FILTER_USE_INT)
+#if defined(SSE_FILTER_OPT)
         y128 = _mm_setzero_ps();
         for (; k<midorder-3; k+=4) {
             __m128 coeffs = _mm_loadu_ps(xcoeffs + (midorder - (k + 3)));
@@ -197,16 +194,12 @@ filter_real filter_compute(const filter* f, const filter_state* s) {
         }
 
         y += 
-#if defined(SSE_FILTER_OPT) && !defined(FILTER_USE_INT)
+#if defined(SSE_FILTER_OPT)
 			_mm_cvtss_f32(horizontal_add(y128)) +
 #endif
 			xcoeffs[0] * xprev[i];
 
-#ifdef FILTER_USE_INT
-	return y >> FILTER_INT_FRACT;
-#else
-	return (filter_real)y;
-#endif
+	return (float)y;
 }
 
 filter* filter_lp_fir_alloc(double freq, const int order) {
@@ -253,19 +246,11 @@ filter* filter_lp_fir_alloc(double freq, const int order) {
 
 	/* adjust the gain to be exact 1.0 */
 	for (i = 0; i <= midorder; ++i)
-#ifdef FILTER_USE_INT
-		f->xcoeffs[i] = (filter_real)((xcoeffs[i] / gain) * (1 << FILTER_INT_FRACT));
-#else
-		f->xcoeffs[i] = (filter_real)(xcoeffs[i] / gain);
-#endif
+		f->xcoeffs[i] = (float)(xcoeffs[i] / gain);
 
-	/* decrease the order if the last coeffs are 0 */
+	/* decrease the order if the last coeffs are near 0 */
 	i = midorder;
-#ifdef FILTER_USE_INT
-	while (i > 0 && f->xcoeffs[i] == 0)
-#else
-	while (i > 0 && (int)(fabs(f->xcoeffs[i])*32767) == 0) // cutoff low coefficients similar to integer case
-#endif
+	while (i > 0 && (int)(fabsf(f->xcoeffs[i])*32767.f) == 0) // cutoff low coefficients
 		--i;
 
 	f->order = i * 2 + 1;
@@ -273,9 +258,12 @@ filter* filter_lp_fir_alloc(double freq, const int order) {
 	return f;
 }
 
+//
+// IIR, see for example: https://www.beis.de/Elektronik/Filter/AnaDigFilt/AnaDigFilt.html
+//
 
 void filter2_setup(const int type, const double fc, const double d, const double gain,
-					filter2_context *filter2, const unsigned int sample_rate)
+	filter2_context * const __restrict filter2, const unsigned int sample_rate)
 {
 	const double two_over_T = 2*sample_rate;
 	const double two_over_T_squared = (double)((long long)(2*sample_rate) * (long long)(2*sample_rate));
@@ -317,12 +305,10 @@ void filter2_setup(const int type, const double fc, const double d, const double
 
 
 /* Reset the input/output voltages to 0. */
-void filter2_reset(filter2_context *filter2)
+void filter2_reset(filter2_context * const __restrict filter2)
 {
-	filter2->x0 = 0;
 	filter2->x1 = 0;
 	filter2->x2 = 0;
-	filter2->y0 = 0;
 	filter2->y1 = 0;
 	filter2->y2 = 0;
 }
@@ -330,17 +316,23 @@ void filter2_reset(filter2_context *filter2)
 
 /* Step the filter. */
 
-/* Step the filter with an input, returning the output */
-double filter2_step_with(filter2_context * const __restrict filter2, double input)
+// directly set digital coefficients
+void filter_setup(const double b0, const double b1, const double b2, const double a1, const double a2, // a0 = 1
+	filter2_context * const __restrict context)
 {
-	filter2->x0 = input;
-	filter2_step(filter2);
-	return filter2->y0;
+	context->b0 = b0;
+	context->b1 = b1;
+	context->b2 = b2;
+	context->a1 = a1;
+	context->a2 = a2;
+
+	// reset the filter inputs
+	filter2_reset(context);
 }
 
 /* Setup a filter2 structure based on an op-amp multipole bandpass circuit. */
-void filter_opamp_m_bandpass_setup(double r1, double r2, double r3, double c1, double c2,
-					filter2_context *filter2, unsigned int sample_rate)
+void filter_opamp_m_bandpass_setup(const double r1, const double r2, const double r3, const double c1, const double c2,
+	filter2_context * const __restrict filter2, const unsigned int sample_rate)
 {
 	double r_in, fc, d, gain;
 
@@ -385,7 +377,7 @@ void filter_opamp_m_bandpass_setup(double r1, double r2, double r3, double c1, d
 //              GND        GND
 //
 void filter_mf_lp_setup(const double R1, const double R2, const double R3, const double C1, const double C2,
-	struct filter2_context_struct *context, const int sample_rate)
+	filter2_context * const __restrict context, const int sample_rate)
 {
 	// Continuous-time transfer function for the analog version of
 	// this filter:
@@ -409,7 +401,7 @@ void filter_mf_lp_setup(const double R1, const double R2, const double R3, const
 	const double c2 = C1*C2*R2*R3;
 
 	// calculate the cutoff frequency for the filter
-	const double Fc = 1.0 / ((2.0 * PI) * sqrt(R2*R3*C1*C2));
+	const double Fc = 1.0 / ((2.0 * PI) * sqrt(c2));
 
 	// calculate the time step factor
 	const double g = 1.0 / tan(PI * Fc / sample_rate);
@@ -445,7 +437,7 @@ void filter_mf_lp_setup(const double R1, const double R2, const double R3, const
 //                         GND
 //
 void filter_active_lp_setup(const double R1, const double R2, const double R3, const double C1,
-	struct filter2_context_struct *context, const int sample_rate)
+	filter2_context * const __restrict context, const int sample_rate)
 {
 	// Continuous-time transfer function for the analog filter:
 	//
@@ -501,7 +493,7 @@ void filter_active_lp_setup(const double R1, const double R2, const double R3, c
 //                               +------------+
 //
 void filter_sallen_key_lp_setup(const double R1, const double R2, const double C1, const double C2,
-	struct filter2_context_struct *context, const int sample_rate)
+	filter2_context * const __restrict context, const int sample_rate)
 {
 	// Continuous-time transfer function for the analog filter:
 	//
@@ -518,7 +510,7 @@ void filter_sallen_key_lp_setup(const double R1, const double R2, const double C
 	// ... and calculate the coefficients c1 and c2.
 	//
 	const double c1 = C2*(R1 + R2);
-	const double c2 = R1*C1*R2*C2;
+	const double c2 = R1*R2*C1*C2;
 
 	// calculate the cutoff frequency for the filter
 	const double Fc = 1.0 / ((2.0 * PI) * c1);
@@ -527,7 +519,8 @@ void filter_sallen_key_lp_setup(const double R1, const double R2, const double C
 	const double g = 1.0 / tan(PI * Fc / sample_rate);
 	const double gn = g * (2.0 * PI) * Fc;
 
-	// calculate the difference equation coefficients
+	// Now we can calculate the difference equation coefficients from
+	// the continuous-time transfer function coefficients.
 	const double cc = 1.0 + gn*c1 + gn*gn*c2;
 	context->b0 = 1.0 / cc;
 	context->b1 = 2.0 / cc;

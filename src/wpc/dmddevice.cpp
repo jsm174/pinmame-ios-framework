@@ -1,3 +1,5 @@
+#ifdef WIN32
+
 #include <windows.h>
 #include "driver.h"
 #include "gen.h"
@@ -261,7 +263,7 @@ void renderDMDFrame(UINT64 gen, UINT16 width, UINT16 height, UINT8 *currbuffer, 
 
 	if ((gen == GEN_SAM) ||
 		// extended handling also for some GTS3 games (SMB, SMBMW and CBW):
-		(_strnicmp(GameName, "smb", 3) == 0) || (_strnicmp(GameName, "cueball", 7) == 0) ||
+		(strncasecmp(GameName, "smb", 3) == 0) || (strncasecmp(GameName, "cueball", 7) == 0) ||
 		(gen == GEN_ALVG_DMD2)) {
 		if (noOfRawFrames != 0) {
 			if (DmdDev_Render_16_Shades_with_Raw) {
@@ -474,3 +476,5 @@ void renderAlphanumericFrame(UINT64 gen, UINT16 *seg_data, char *seg_dim, UINT8 
 	else if (DmdScr_render_PM_Alphanumeric_Frame) // older interface without dimming
 		DmdScr_render_PM_Alphanumeric_Frame(layout, seg_data, seg_data2);
 }
+
+#endif

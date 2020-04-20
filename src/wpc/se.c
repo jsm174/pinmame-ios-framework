@@ -39,9 +39,8 @@ DMD Timing is still wrong.. FIRQ rate is variable, and it's not fully understood
 #include "p-roc/p-roc.h"
 #endif
 
-#define SE_VBLANKFREQ      60 /* VBLANK frequency */
-#define SE_FIRQFREQ       976 /* FIRQ Frequency according to Theory of Operation */
-#define SE_ROMBANK0         1
+#define SE_FIRQFREQ        976 /* FIRQ Frequency according to Theory of Operation */
+#define SE_ROMBANK0        1
 
 #ifdef PROC_SUPPORT
 // TODO/PROC: Make variables out of these defines. Values depend on "-proc" switch.
@@ -234,17 +233,17 @@ static MACHINE_INIT(se3) {
 	// It appears all systems of se3 generation are the same... :) 
 	selocals.fastflipaddr = 0x04 + 1;
 
-/*	if (_strnicmp(gn, "sopranos", 8) == 0)
+/*	if (strncasecmp(gn, "sopranos", 8) == 0)
 		selocals.fastflipaddr = 0x04 + 1;
-	else if (_strnicmp(gn, "elvis", 5) == 0)
+	else if (strncasecmp(gn, "elvis", 5) == 0)
 		selocals.fastflipaddr = 0x04 + 1;
-	else if (_strnicmp(gn, "gprix", 5) == 0)
+	else if (strncasecmp(gn, "gprix", 5) == 0)
 		selocals.fastflipaddr = 0x04 + 1;
-	else if (_strnicmp(gn, "nascar", 6) == 0)
+	else if (strncasecmp(gn, "nascar", 6) == 0)
 		selocals.fastflipaddr = 0x04 + 1;
-	else if (_strnicmp(gn, "ripleys", 7) == 0)
+	else if (strncasecmp(gn, "ripleys", 7) == 0)
 		selocals.fastflipaddr = 0x04 + 1;
-	else if (_strnicmp(gn, "lotr", 4) == 0)
+	else if (strncasecmp(gn, "lotr", 4) == 0)
 		selocals.fastflipaddr = 0x04 + 1;*/
 }
 
@@ -254,55 +253,55 @@ static MACHINE_INIT(se) {
   sndbrd_1_init(SNDBRD_DE2S,    1, memory_region(DE2S_ROMREGION), NULL, NULL);
 
   // for description on Fast flips, see above
-  if (_strnicmp(gn, "sprk_103", 8) == 0)
+  if (strncasecmp(gn, "sprk_103", 8) == 0)
 	  selocals.fastflipaddr = 0x0 + 1;
-  else if (_strnicmp(gn, "austin", 6) == 0)
+  else if (strncasecmp(gn, "austin", 6) == 0)
 	  selocals.fastflipaddr = 0x0 + 1;
-  else if (_strnicmp(gn, "monopoly", 8) == 0)
+  else if (strncasecmp(gn, "monopoly", 8) == 0)
 	  selocals.fastflipaddr = 0xf0 + 1;
-  else if (_strnicmp(gn, "twst_405", 8) == 0)
+  else if (strncasecmp(gn, "twst_405", 8) == 0)
 	  selocals.fastflipaddr = 0x14d + 1;
-  else if (_strnicmp(gn, "shrkysht", 8) == 0)
+  else if (strncasecmp(gn, "shrkysht", 8) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "harl_a30", 8) == 0)
+  else if (strncasecmp(gn, "harl_a30", 8) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "hirolcas", 8) == 0)
+  else if (strncasecmp(gn, "hirolcas", 8) == 0)
 	  selocals.fastflipaddr = 0x04 + 1;
-  else if (_strnicmp(gn, "simpprty", 8) == 0)
+  else if (strncasecmp(gn, "simpprty", 8) == 0)
 	  selocals.fastflipaddr = 0x04 + 1;
-  else if (_strnicmp(gn, "term3", 5) == 0)
+  else if (strncasecmp(gn, "term3", 5) == 0)
 	  selocals.fastflipaddr = 0x04 + 1;
-  else if (_strnicmp(gn, "playboys", 8) == 0)
+  else if (strncasecmp(gn, "playboys", 8) == 0)
 	  selocals.fastflipaddr = 0x04 + 1;
-  else if (_strnicmp(gn, "rctycn", 6) == 0)
+  else if (strncasecmp(gn, "rctycn", 6) == 0)
 	  selocals.fastflipaddr = 0x04 + 1;
   // For apollo13, fast flips is not really necessary: The flipper "solenoids" are enable/disable flags and act just like the fast flip solenoid!
   // I'll leave it in there for consistency though since it makes the VP table counter part easier to code.
-  else if (_strnicmp(gn, "apollo13", 8) == 0)
+  else if (strncasecmp(gn, "apollo13", 8) == 0)
 	  selocals.fastflipaddr = 0x122 + 1;
-  else if (_strnicmp(gn, "godzilla", 8) == 0)
+  else if (strncasecmp(gn, "godzilla", 8) == 0)
 	  selocals.fastflipaddr = 0x0 + 1;
-  else if (_strnicmp(gn, "id4", 3) == 0)
+  else if (strncasecmp(gn, "id4", 3) == 0)
 	  selocals.fastflipaddr = 0x150 + 1;
-  else if (_strnicmp(gn, "lostspc", 7) == 0)
+  else if (strncasecmp(gn, "lostspc", 7) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "jplstw22", 8) == 0)
+  else if (strncasecmp(gn, "jplstw22", 8) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "spacejam", 8) == 0)
+  else if (strncasecmp(gn, "spacejam", 8) == 0)
 	  selocals.fastflipaddr = 0x14d + 1;
-  else if (_strnicmp(gn, "swtril43", 8) == 0)
+  else if (strncasecmp(gn, "swtril43", 8) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "vipr_102", 8) == 0)
+  else if (strncasecmp(gn, "vipr_102", 8) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "xfiles", 6) == 0)
+  else if (strncasecmp(gn, "xfiles", 6) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "nfl", 3) == 0)
+  else if (strncasecmp(gn, "nfl", 3) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "startrp2", 8) == 0)
+  else if (strncasecmp(gn, "startrp2", 8) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "strikext", 8) == 0)
+  else if (strncasecmp(gn, "strikext", 8) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
-  else if (_strnicmp(gn, "strxt_uk", 8) == 0)
+  else if (strncasecmp(gn, "strxt_uk", 8) == 0)
 	  selocals.fastflipaddr = 0x00 + 1;
   // Sharkeys got some extra ram
   if (core_gameData->gen & GEN_WS_1) {
@@ -566,7 +565,7 @@ static WRITE_HANDLER(giaux_w) {
 
 #if 0
   if(GET_BIT4 == 0)
-  printf("giaux = %x, (GI=%x A=%x B=%x C=%x D=%x E=%x), aux = %x (%c)\n",data,GET_BIT0,GET_BIT7,GET_BIT3,GET_BIT4,GET_BIT5,GET_BIT6,selocals.auxdata,selocals.auxdata);
+    printf("giaux = %x, (GI=%x A=%x B=%x C=%x D=%x E=%x), aux = %x (%c)\n",data,GET_BIT0,GET_BIT7,GET_BIT3,GET_BIT4,GET_BIT5,GET_BIT6,selocals.auxdata,selocals.auxdata);
 #endif
   coreGlobals.gi[0]=(~data & 0x01) ? 9 : 0;
   if (core_gameData->hw.display & (SE_MINIDMD|SE_MINIDMD3)) {
@@ -595,11 +594,11 @@ static WRITE_HANDLER(giaux_w) {
     selocals.lastgiaux = data;
   }
   else if (core_gameData->hw.display & SE_MINIDMD2) {
-    int ii, bits;
     if (data & ~selocals.lastgiaux & 0x80) { /* clock in data to minidmd */
       selocals.miniidx = (selocals.miniidx + 1) % 7;
       selocals.minidata[selocals.miniidx] = selocals.auxdata & 0x7f;
       if ((selocals.auxdata & 0x80) == 0) { /* enabled column? */
+        int ii, bits;
         for (ii=0, bits = 0x01; ii < 14; ii++, bits <<= 1) {
           if (bits & ((selocals.minidata[3] << 7) | selocals.minidata[4])) {
             selocals.minidmd[0][ii/7][ii%7] = selocals.minidata[0];
@@ -641,12 +640,12 @@ static WRITE_HANDLER(giaux_w) {
 
 // MINI DMD Type 1 (HRC) (15x7)
 PINMAME_VIDEO_UPDATE(seminidmd1_update) {
-  tDMDDot dotCol;
-  int ii,jj,kk,bits;
+  int ii,bits;
   UINT16 *seg = &coreGlobals.drawSeg[0];
 
   for (ii = 0, bits = 0x40; ii < 7; ii++, bits >>= 1) {
-    UINT8 *line = &dotCol[ii+1][0];
+    UINT8 *line = &coreGlobals.dotCol[ii+1][0];
+    int jj,kk;
     for (jj = 2; jj >= 0; jj--)
       for (kk = 0; kk < 5; kk++) {
         *line++ = ((selocals.minidmd[0][jj][kk] & bits) + (selocals.minidmd[1][jj][kk] & bits) +
@@ -654,83 +653,87 @@ PINMAME_VIDEO_UPDATE(seminidmd1_update) {
       }
   }
   for (ii = 0; ii < 15; ii++) {
+    int jj;
     bits = 0;
     for (jj = 0; jj < 7; jj++)
-      bits = (bits<<2) | dotCol[jj+1][ii];
+      bits = (bits<<2) | coreGlobals.dotCol[jj+1][ii];
     *seg++ = bits;
   }
-if (!pmoptions.dmd_only)
-    video_update_core_dmd(bitmap, cliprect, dotCol, layout);
+  if (!pmoptions.dmd_only)
+    video_update_core_dmd(bitmap, cliprect, layout);
   return 0;
 }
 // MINI DMD Type 1 (Ripley's) (3 x 5x7)
 PINMAME_VIDEO_UPDATE(seminidmd1s_update) {
-  tDMDDot dotCol;
-  int ii,kk,bits;
+  int ii,bits;
   int jj = 2-(layout->left-10)/8;
   UINT16 *seg = &coreGlobals.drawSeg[5*(2-jj)];
 
   for (ii = 0, bits = 0x40; ii < 7; ii++, bits >>= 1) {
-    UINT8 *line = &dotCol[ii+1][0];
+    UINT8 *line = &coreGlobals.dotCol[ii+1][0];
+    int kk;
     for (kk = 0; kk < 5; kk++)
       *line++ = ((selocals.minidmd[0][jj][kk] & bits) + (selocals.minidmd[1][jj][kk] & bits) +
                  (selocals.minidmd[2][jj][kk] & bits))/bits;
   }
   for (ii = 0; ii < 5; ii++) {
+    int kk;
     bits = 0;
     for (kk = 0; kk < 7; kk++)
-      bits = (bits<<2) | dotCol[kk+1][ii];
+      bits = (bits<<2) | coreGlobals.dotCol[kk+1][ii];
     *seg++ = bits;
   }
-if (!pmoptions.dmd_only)
-    video_update_core_dmd(bitmap, cliprect, dotCol, layout);
+  if (!pmoptions.dmd_only)
+    video_update_core_dmd(bitmap, cliprect, layout);
   return 0;
 }
 // MINI DMD Type 2 (Monopoly) (15x7)
 PINMAME_VIDEO_UPDATE(seminidmd2_update) {
-  tDMDDot dotCol;
-  int ii,jj,kk,bits;
+  int ii,bits;
   UINT16 *seg = &coreGlobals.drawSeg[0];
 
   for (ii = 0, bits = 0x01; ii < 7; ii++, bits <<= 1) {
-    UINT8 *line = &dotCol[ii+1][0];
+    UINT8 *line = &coreGlobals.dotCol[ii+1][0];
+    int jj,kk;
     for (jj = 0; jj < 3; jj++)
       for (kk = 4; kk >= 0; kk--)
         *line++ = ((selocals.minidmd[0][jj][kk] & bits) + (selocals.minidmd[1][jj][kk] & bits) +
                    (selocals.minidmd[2][jj][kk] & bits))/bits;
   }
   for (ii = 0; ii < 15; ii++) {
+    int jj;
     bits = 0;
     for (jj = 0; jj < 7; jj++)
-      bits = (bits<<2) | dotCol[jj+1][ii];
+      bits = (bits<<2) | coreGlobals.dotCol[jj+1][ii];
     *seg++ = bits;
   }
-if (!pmoptions.dmd_only)
-    video_update_core_dmd(bitmap, cliprect, dotCol, layout);
+  if (!pmoptions.dmd_only)
+    video_update_core_dmd(bitmap, cliprect, layout);
   return 0;
 }
 // MINI DMD Type 3 (RCT) (21x5)
 PINMAME_VIDEO_UPDATE(seminidmd3_update) {
-  tDMDDot dotCol;
-  int ii,jj,kk,bits;
+  int ii,kk;
   UINT16 *seg = &coreGlobals.drawSeg[0];
 
-  memset(&dotCol,0,sizeof(dotCol));
+  memset(coreGlobals.dotCol,0,sizeof(coreGlobals.dotCol));
   for (kk = 0; kk < 5; kk++) {
-    UINT8 *line = &dotCol[kk+1][0];
+    UINT8 *line = &coreGlobals.dotCol[kk+1][0];
+    int jj,bits;
     for (jj = 0; jj < 3; jj++)
       for (ii = 0, bits = 0x01; ii < 7; ii++, bits <<= 1)
         *line++ = ((selocals.minidmd[0][jj][kk] & bits) + (selocals.minidmd[1][jj][kk] & bits) +
                    (selocals.minidmd[2][jj][kk] & bits))/bits;
   }
   for (ii = 0; ii < 21; ii++) {
-    bits = 0;
+    int bits = 0;
+    int jj;
     for (jj = 0; jj < 5; jj++)
-      bits = (bits<<2) | dotCol[jj+1][ii];
+      bits = (bits<<2) | coreGlobals.dotCol[jj+1][ii];
     *seg++ = bits;
   }
-if (!pmoptions.dmd_only)
-    video_update_core_dmd(bitmap, cliprect, dotCol, layout);
+  if (!pmoptions.dmd_only)
+    video_update_core_dmd(bitmap, cliprect, layout);
   return 0;
 }
 // 3-Color MINI DMD Type 4 (Simpsons) (14x10)
@@ -738,32 +741,31 @@ PINMAME_VIDEO_UPDATE(seminidmd4_update) {
   static int color[2][2] = {
     { 0, 6 }, { 7, 9 } // off, green, red, yellow
   };
-  int ii, kk, bits, isRed, isGrn;
+  int ii;
   UINT8 *line;
-  tDMDDot dotCol;
-  UINT16 bits1, bits2;
   UINT16 *seg = &coreGlobals.drawSeg[0];
 
   for (ii=0; ii < 14; ii++) {
-    bits1 = 0;
-    bits2 = 0;
+    UINT16 bits1 = 0;
+    UINT16 bits2 = 0;
+    int kk, bits;
     for (kk=0, bits = 0x40; kk < 7; kk++, bits >>= 1) {
-      isRed = (selocals.minidmd[0][ii/7][ii%7] & bits) > 0;
-      isGrn = (selocals.minidmd[1][ii/7][ii%7] & bits) > 0;
+      int isRed = (selocals.minidmd[0][ii/7][ii%7] & bits) > 0;
+      int isGrn = (selocals.minidmd[1][ii/7][ii%7] & bits) > 0;
       bits1 = (bits1 << 2) | (isGrn << 1) | isRed;
-      line = &dotCol[ii+1][kk];
+      line = &coreGlobals.dotCol[ii+1][kk];
       *line = color[isRed][isGrn];
       isRed = (selocals.minidmd[2][ii/7][ii%7] & bits) > 0;
       isGrn = (selocals.minidmd[3][ii/7][ii%7] & bits) > 0;
       bits2 = (bits2 << 2) | (isGrn << 1) | isRed;
-      line = &dotCol[ii+1][7+kk];
+      line = &coreGlobals.dotCol[ii+1][7+kk];
       *line = color[isRed][isGrn];
     }
     *seg++ = bits1;
     *seg++ = bits2;
   }
-if (!pmoptions.dmd_only)
-    video_update_core_dmd(bitmap, cliprect, dotCol, layout);
+  if (!pmoptions.dmd_only)
+    video_update_core_dmd(bitmap, cliprect, layout);
   return 0;
 }
 
@@ -809,7 +811,7 @@ MEMORY_END
 
 static MACHINE_DRIVER_START(se)
   MDRV_IMPORT_FROM(PinMAME)
-  MDRV_CPU_ADD(M6809, 2000000)
+  MDRV_CPU_ADD(M6809, 2000000) // MC6809E
   MDRV_CORE_INIT_RESET_STOP(se,NULL,se)
   MDRV_CPU_MEMORY(se_readmem, se_writemem)
   MDRV_CPU_VBLANK_INT(se_vblank, 1)
@@ -823,7 +825,7 @@ MACHINE_DRIVER_END
 MACHINE_DRIVER_START(se2aS)
   MDRV_IMPORT_FROM(se)
   MDRV_IMPORT_FROM(de2as)
-  MDRV_IMPORT_FROM(de_dmd32)
+  MDRV_IMPORT_FROM(se_dmd32)
   MDRV_SOUND_CMD(sndbrd_1_data_w)
   MDRV_SOUND_CMDHEADING("se")
 MACHINE_DRIVER_END
@@ -831,7 +833,7 @@ MACHINE_DRIVER_END
 MACHINE_DRIVER_START(se2tS)
   MDRV_IMPORT_FROM(se)
   MDRV_IMPORT_FROM(de2ts)
-  MDRV_IMPORT_FROM(de_dmd32)
+  MDRV_IMPORT_FROM(se_dmd32)
   MDRV_SOUND_CMD(sndbrd_1_data_w)
   MDRV_SOUND_CMDHEADING("se")
 MACHINE_DRIVER_END
@@ -839,7 +841,7 @@ MACHINE_DRIVER_END
 MACHINE_DRIVER_START(se2bS)
   MDRV_IMPORT_FROM(se)
   MDRV_IMPORT_FROM(de2bs)
-  MDRV_IMPORT_FROM(de_dmd32)
+  MDRV_IMPORT_FROM(se_dmd32)
   MDRV_SOUND_CMD(sndbrd_1_data_w)
   MDRV_SOUND_CMDHEADING("se")
 MACHINE_DRIVER_END
@@ -858,7 +860,7 @@ MACHINE_DRIVER_START(se3aS)
   MDRV_DIAGNOSTIC_LEDH(2)
 //
   MDRV_IMPORT_FROM(de3as)
-  MDRV_IMPORT_FROM(de_dmd32)
+  MDRV_IMPORT_FROM(se_dmd32)
   MDRV_SOUND_CMD(sndbrd_1_data_w)
   MDRV_SOUND_CMDHEADING("se")
 MACHINE_DRIVER_END

@@ -1229,7 +1229,7 @@ static MACHINE_INIT(sam) {
 	#endif
 }
 
-void sam_init()
+void sam_init(void)
 {
 	const char * const gn = Machine->gamedrv->name;
 
@@ -1239,7 +1239,7 @@ void sam_init()
 	samlocals.led_row = -1;
 
 	//!! timing hacks for CSI and IJ
-	if (_strnicmp(gn, "csi_", 4) == 0 || _strnicmp(gn, "ij4_", 4) == 0)
+	if (strncasecmp(gn, "csi_", 4) == 0 || strncasecmp(gn, "ij4_", 4) == 0)
 		at91_block_timers = 1;
 	else
 		at91_block_timers = 0;
@@ -1256,63 +1256,67 @@ void sam_init()
 	// breakpoint will hit.  Walk back up the stack one step to find the arm7core write.  This will have the 
 	// arm7 memory addr as the parameter.  This is the value you need here.  
 
-	if (_strnicmp(gn, "trn_174h", 8) == 0)
+	if (strncasecmp(gn, "trn_174h", 8) == 0)
 		samlocals.fastflipaddr = 0x0107ad24;
-	else if (_strnicmp(gn, "acd_168h", 8) == 0)
+	else if (strncasecmp(gn, "acd_168h", 8) == 0)
 		samlocals.fastflipaddr = 0x0107cd82;
-	else if (_strnicmp(gn, "acd_170h", 8) == 0)
+	else if (strncasecmp(gn, "acd_170h", 8) == 0)
 		samlocals.fastflipaddr = 0x0107af62;
-	else if (_strnicmp(gn, "acd_170", 7) == 0)
+	else if (strncasecmp(gn, "acd_170", 7) == 0)
 		samlocals.fastflipaddr = 0x0106e1b6;
-	else if (_strnicmp(gn, "mtl_170h", 8) == 0)
+	else if (strncasecmp(gn, "mtl_170h", 8) == 0)
 		samlocals.fastflipaddr = 0x0107f646;
-	else if (_strnicmp(gn, "mtl_180h", 8) == 0)
+	else if (strncasecmp(gn, "mtl_180h", 8) == 0)
 		samlocals.fastflipaddr = 0x0107f676;
-	else if (_strnicmp(gn, "twd_160h", 8) == 0)
+	else if (strncasecmp(gn, "twd_160h", 8) == 0)
 		samlocals.fastflipaddr = 0x0107f7d2;
-	else if (_strnicmp(gn, "twd_160", 7) == 0)
+	else if (strncasecmp(gn, "twd_160", 7) == 0)
 		samlocals.fastflipaddr = 0x01074d4a;
-	else if (_strnicmp(gn, "wof_500", 7) == 0)
+	else if (strncasecmp(gn, "wof_500", 7) == 0)
 		samlocals.fastflipaddr = 0x0106e7e6;
-	else if (_strnicmp(gn, "st_161h", 7) == 0)
+	else if (strncasecmp(gn, "st_161h", 7) == 0)
 		samlocals.fastflipaddr = 0x0107d7a2;
-	else if (_strnicmp(gn, "xmn_151h", 8) == 0)
+	else if (strncasecmp(gn, "xmn_151h", 8) == 0)
 		samlocals.fastflipaddr = 0x0107b222;
-	else if (_strnicmp(gn, "fg_1200", 7) == 0)
+	else if (strncasecmp(gn, "fg_1200", 7) == 0)
 		samlocals.fastflipaddr = 0x010681d6;
-	else if (_strnicmp(gn, "potc_600", 8) == 0)
+	else if (strncasecmp(gn, "potc_600", 8) == 0)
 		samlocals.fastflipaddr = 0x0105a7fe;
-	else if (_strnicmp(gn, "im_183ve", 8) == 0)
+	else if (strncasecmp(gn, "im_183ve", 8) == 0)
 		samlocals.fastflipaddr = 0x01055bf6;
-	else if (_strnicmp(gn, "avr_200", 7) == 0)
+	else if (strncasecmp(gn, "im_185ve", 6) == 0)
+		samlocals.fastflipaddr = 0x01053ed6;
+	else if (strncasecmp(gn, "im_185", 6) == 0)
+		samlocals.fastflipaddr = 0x01068bde;
+	else if (strncasecmp(gn, "avr_200", 7) == 0)
 		samlocals.fastflipaddr = 0x01056afa;
-	else if (_strnicmp(gn, "avs_170", 7) == 0)
+	else if (strncasecmp(gn, "avs_170", 7) == 0)
 		samlocals.fastflipaddr = 0x0106db1e;
-	else if (_strnicmp(gn, "wpt_140a", 8) == 0)
+	else if (strncasecmp(gn, "wpt_140a", 8) == 0)
 		samlocals.fastflipaddr = 0x01075712;
-	else if (_strnicmp(gn, "tf_180h", 7) == 0)
+	else if (strncasecmp(gn, "tf_180h", 7) == 0)
 		samlocals.fastflipaddr = 0x0107472e;
-	else if (_strnicmp(gn, "tf_180", 6) == 0)
+	else if (strncasecmp(gn, "tf_180", 6) == 0)
 		samlocals.fastflipaddr = 0x0106ea72;
-	else if (_strnicmp(gn, "bdk_294", 7) == 0)
+	else if (strncasecmp(gn, "bdk_294", 7) == 0)
 		samlocals.fastflipaddr = 0x010791be;
-	else if (_strnicmp(gn, "shr_141", 7) == 0)
+	else if (strncasecmp(gn, "shr_141", 7) == 0)
 		samlocals.fastflipaddr = 0x01068fde;
-	else if (_strnicmp(gn, "bbh_170", 7) == 0)
+	else if (strncasecmp(gn, "bbh_170", 7) == 0)
 		samlocals.fastflipaddr = 0x0106acae;
-	else if (_strnicmp(gn, "smanve_101", 10) == 0)
+	else if (strncasecmp(gn, "smanve_101", 10) == 0)
 		samlocals.fastflipaddr = 0x0106d61e;
-	else if (_strnicmp(gn, "nba_802", 7) == 0)
+	else if (strncasecmp(gn, "nba_802", 7) == 0)
 		samlocals.fastflipaddr = 0x010609be;
-	else if (_strnicmp(gn, "rsn_110h", 8) == 0)
+	else if (strncasecmp(gn, "rsn_110h", 8) == 0)
 		samlocals.fastflipaddr = 0x01070716;
-	else if (_strnicmp(gn, "csi_240", 7) == 0)
+	else if (strncasecmp(gn, "csi_240", 7) == 0)
 		samlocals.fastflipaddr = 0x0106475e;
-	else if (_strnicmp(gn, "ij4_210", 7) == 0)
+	else if (strncasecmp(gn, "ij4_210", 7) == 0)
 		samlocals.fastflipaddr = 0x01072dea;
-	else if (_strnicmp(gn, "twenty4_150", 11) == 0)
+	else if (strncasecmp(gn, "twenty4_150", 11) == 0)
 		samlocals.fastflipaddr = 0x0106ec1e;
-	else if (_strnicmp(gn, "mt_145h", 7) == 0)
+	else if (strncasecmp(gn, "mt_145h", 7) == 0)
 		samlocals.fastflipaddr = 0x01077b82;
 }
 
@@ -1361,11 +1365,11 @@ static void sam_LED_hack(int usartno)
 
 	// Several games do not transmit data for a really long time.  These are ROM hacks that force the issue to get things moving.  
 	
-	if (_strnicmp(gn, "mt_145h", 7)==0)
+	if (strncasecmp(gn, "mt_145h", 7)==0)
 	{
 		cpu_writemem32ledw(0x1061728, 0x00);
 	}
-	else if (_strnicmp(gn, "mt_145", 6)==0)
+	else if (strncasecmp(gn, "mt_145", 6)==0)
 	{
 		cpu_writemem32ledw_dword(0x1eb0, 0xe1a00000);
 	}
@@ -1483,7 +1487,7 @@ static INTERRUPT_GEN(sam_vblank) {
 	/*-------------------------------
 	/  copy local data to interface
 	/--------------------------------*/
-	samlocals.vblankCount += 1;
+	samlocals.vblankCount++;
 	
 	/*-- lamps --*/
 	memcpy(coreGlobals.lampMatrix, coreGlobals.tmpLampMatrix, sizeof(coreGlobals.tmpLampMatrix));
@@ -1618,54 +1622,51 @@ static PINMAME_VIDEO_UPDATE(samdmd_update) {
 	//	{ 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15};
 
 	int ii;
-	tDMDDot dotCol;
 
 	for( ii = 0; ii < 32; ii++ )
 	{
-		UINT8 *line = &dotCol[ii+1][0];
+		UINT8 *line = &coreGlobals.dotCol[ii+1][0];
 		const UINT8* const offs1 = memory_region(REGION_CPU1) + 0x1080000 + (samlocals.video_page[0] << 12) + ii * 128;
 		const UINT8* const offs2 = memory_region(REGION_CPU1) + 0x1080000 + (samlocals.video_page[1] << 12) + ii * 128;
 		int jj;
 		for( jj = 0; jj < 128; jj++ )
 		{
-			const UINT8 * const RAM1 = offs1 + jj;
-			const UINT8 * const RAM2 = offs2 + jj;
-			const UINT8 temp = ((*RAM1 & 0xF0) == 0xF0) ? *RAM2 : *RAM1; //!! check if there are also other cases where (*RAM1 & 0xF0) != 0 (e.g. only few bits set -> then mix more finegrained??)
-			if(((*RAM1 & 0xF0) != 0xF0) && ((*RAM1 & 0xF0) != 0x00))
+			const UINT8 RAM1 = offs1[jj];
+			const UINT8 RAM2 = offs2[jj];
+			const UINT8 temp = ((RAM1 & 0xF0) == 0xF0) ? RAM2 : RAM1; //!! check if there are also other cases where (RAM1 & 0xF0) != 0 (e.g. only few bits set -> then mix more finegrained??)
+			if (((RAM1 & 0xF0) != 0xF0) && ((RAM1 & 0xF0) != 0x00))
 				LOG(("DMD Bitmask %01x",(*RAM1 & 0xF0)>>4));
 			*line = hew[temp];
 			line++;
 		}
 	}
 
-	video_update_core_dmd(bitmap, cliprect, dotCol, layout);
+	video_update_core_dmd(bitmap, cliprect, layout);
 	return 0;
 }
 
 static PINMAME_VIDEO_UPDATE(samminidmd_update) {
-    tDMDDot dotCol;
     int ii,kk,bits;
     const int dmd_x = (layout->left-10)/7;
     const int dmd_y = (layout->top-34)/9;
 
     for (ii = 1, bits = 0x40; ii < 8; ii++, bits >>= 1)
         for (kk = 0; kk < 5; kk++)
-            dotCol[ii][kk] = samlocals.miniDMDData[dmd_y*5 + kk][dmd_x] & bits ? 3 : 0;
+            coreGlobals.dotCol[ii][kk] = samlocals.miniDMDData[dmd_y*5 + kk][dmd_x] & bits ? 3 : 0;
 
     for (ii = 0; ii < 5; ii++) {
         bits = 0;
         for (kk = 1; kk < 8; kk++)
-            bits = (bits<<1) | (dotCol[kk][ii] ? 1 : 0);
+            bits = (bits<<1) | (coreGlobals.dotCol[kk][ii] ? 1 : 0);
         coreGlobals.drawSeg[5*dmd_x + 35*dmd_y + ii] = bits;
     }
 
     if (!pmoptions.dmd_only)
-        video_update_core_dmd(bitmap, cliprect, dotCol, layout);
+        video_update_core_dmd(bitmap, cliprect, layout);
     return 0;
 }
 
 static PINMAME_VIDEO_UPDATE(samminidmd2_update) {
-    tDMDDot dotCol;
     int ii,jj,kk,bits;
 
 	if (options.usemodsol)
@@ -1675,7 +1676,7 @@ static PINMAME_VIDEO_UPDATE(samminidmd2_update) {
 				for (kk = 0; kk < 5; kk++)
 				{
 					const int target = ((jj * 7) + ii) + (kk * 35);
-					dotCol[kk + 1][(jj * 7) + ii] = coreGlobals.RGBlamps[target + 60] >> 4;
+					coreGlobals.dotCol[kk + 1][(jj * 7) + ii] = coreGlobals.RGBlamps[target + 60] >> 4;
 				}
 	}
 	else
@@ -1683,17 +1684,17 @@ static PINMAME_VIDEO_UPDATE(samminidmd2_update) {
 		for (jj = 0; jj < 5; jj++)
 			for (ii = 0, bits = 0x40; ii < 7; ii++, bits >>= 1)
 				for (kk = 0; kk < 5; kk++)
-					dotCol[kk + 1][ii + (jj * 7)] = samlocals.miniDMDData[kk][jj] & bits ? 15 : 0;
+					coreGlobals.dotCol[kk + 1][ii + (jj * 7)] = samlocals.miniDMDData[kk][jj] & bits ? 15 : 0;
 	}
     for (ii = 0; ii < 35; ii++) {
         bits = 0;
         for (kk = 1; kk < 6; kk++)
-            bits = (bits<<1) | (dotCol[kk][ii] ? 1 : 0);
+            bits = (bits<<1) | (coreGlobals.dotCol[kk][ii] ? 1 : 0);
         coreGlobals.drawSeg[ii] = bits;
     }
 
     if (!pmoptions.dmd_only)
-        video_update_core_dmd(bitmap, cliprect, dotCol, layout);
+        video_update_core_dmd(bitmap, cliprect, layout);
     return 0;
 }
 
@@ -2065,6 +2066,7 @@ CORE_CLONEDEF(potc, 600gf, 600af, "Pirates of the Caribbean (V6.0 German, French
 /-------------------------------------------------------------------*/
 INITGAME(sman, GEN_SAM, sam_dmd128x32, SAM_2COL, SAM_NOMINI)
 
+SAM1_ROM32MB(sman_102af, "sman_102af.bin", CRC(1e77651c) SHA1(fbce7dbe4ce70cd8bd1c01279a774f410f5aaeff), 0x00fbb834)
 SAM1_ROM32MB(sman_130af, "sman_130af.bin", CRC(6aa6a03a) SHA1(f56442e84b8789f49127bf4ba97dd05c77ea7c36), 0x017916C8)
 SAM1_ROM32MB(sman_130ai, "sman_130ai.bin", CRC(92aab158) SHA1(51662102da54e7e7c0f63689fffbf70653ee8f11), 0x017B7960)
 SAM1_ROM32MB(sman_130al, "sman_130al.bin", CRC(33004e72) SHA1(3bc30200945d896aefbff51c7b427595885a23c4), 0x0180AAA0)
@@ -2113,6 +2115,7 @@ SAM1_ROM32MB(sman_262,   "sman_262a.bin",  CRC(9ad85331) SHA1(64a4b4087aee06b79d
 SAM_INPUT_PORTS_START(sman, 1)
 
 CORE_GAMEDEF(sman, 261, "Spider-Man (V2.61)", 2012, "Stern", sam1, 0)
+CORE_CLONEDEF(sman, 102af, 261, "Spider-Man (V1.02 English, French)", 2007, "Stern", sam1, 0)
 CORE_CLONEDEF(sman, 130af, 261, "Spider-Man (V1.30 English, French)", 2007, "Stern", sam1, 0)
 CORE_CLONEDEF(sman, 130ai, 261, "Spider-Man (V1.30 English, Italian)", 2007, "Stern", sam1, 0)
 CORE_CLONEDEF(sman, 130al, 261, "Spider-Man (V1.30 English, Spanish)", 2007, "Stern", sam1, 0)
@@ -2465,18 +2468,21 @@ SAM1_ROM32MB(im_181,  "im_181.bin",  CRC(915d972b) SHA1(0d29929ae304bc4bbdbab781
 SAM1_ROM32MB(im_182,  "im_182.bin",  CRC(c65aff0b) SHA1(ce4d26ffdfd8539e8f7fca78dfa55f80247f9334), 0x01C52C5C)
 SAM1_ROM32MB(im_183,  "im_183.bin",  CRC(cf2791a6) SHA1(eb616e3bf33024374f4e998a579bc88f63282ba6), 0x01C52C5C)
 SAM1_ROM32MB(im_183ve,"im_183ve.bin",CRC(e477183c) SHA1(6314b44b58c79889f95af1792395203dbbb36b0b), 0x01C52C5C)
-
+SAM1_ROM32MB(im_185,  "im_185.bin",  CRC(fc93c3e0) SHA1(41a89a77b60d831231f5b4c66e6ddfa542225013), 0x01C52CDC)
+SAM1_ROM32MB(im_185ve,"im_185ve.bin",CRC(3f1529f1) SHA1(a3654efa93a70f40fe718b31d8c0d40ccc99df6b), 0x01C52CDC)
 SAM_INPUT_PORTS_START(im, 1)
 
-CORE_GAMEDEF(im, 183ve, "Iron Man Vault Edition (V1.83)", 2014, "Stern", sam1, 0)
-CORE_CLONEDEF(im, 100, 183ve, "Iron Man (V1.0)", 2010, "Stern", sam1, 0)
-CORE_CLONEDEF(im, 110, 183ve, "Iron Man (V1.1)", 2010, "Stern", sam1, 0)
-CORE_CLONEDEF(im, 120, 183ve, "Iron Man (V1.2)", 2010, "Stern", sam1, 0)
-CORE_CLONEDEF(im, 140, 183ve, "Iron Man (V1.4)", 2010, "Stern", sam1, 0)
-CORE_CLONEDEF(im, 160, 183ve, "Iron Man (V1.6)", 2011, "Stern", sam1, 0)
-CORE_CLONEDEF(im, 181, 183ve, "Iron Man (V1.81)", 2014, "Stern", sam1, 0)
-CORE_CLONEDEF(im, 182, 183ve, "Iron Man (V1.82)", 2014, "Stern", sam1, 0)
-CORE_CLONEDEF(im, 183, 183ve, "Iron Man (V1.83)", 2014, "Stern", sam1, 0)
+CORE_GAMEDEF(im, 185ve, "Iron Man Vault Edition (V1.85)", 2020, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 100, 185ve, "Iron Man (V1.0)", 2010, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 110, 185ve, "Iron Man (V1.1)", 2010, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 120, 185ve, "Iron Man (V1.2)", 2010, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 140, 185ve, "Iron Man (V1.4)", 2010, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 160, 185ve, "Iron Man (V1.6)", 2011, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 181, 185ve, "Iron Man (V1.81)", 2014, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 182, 185ve, "Iron Man (V1.82)", 2014, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 183, 185ve, "Iron Man (V1.83)", 2014, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 183ve, 185ve, "Iron Man Vault Edition (V1.83)", 2014, "Stern", sam1, 0)
+CORE_CLONEDEF(im, 185, 185ve, "Iron Man (V1.85)", 2020, "Stern", sam1, 0)
 
 /*-------------------------------------------------------------------
 / TRON: Legacy

@@ -186,7 +186,6 @@ static READ_HANDLER(i8039_read_test) {
   return 0;
 }
 
-static tDMDDot dotCol;
 static WRITE_HANDLER(i8039_write_port) {
 /*
   static UINT8 pos = 1;
@@ -283,7 +282,7 @@ static MACHINE_DRIVER_START(SLEIC)
   MDRV_CPU_ADD_TAG("icpu", Z80, 2500000)
   MDRV_CPU_MEMORY(SLEIC_Z80_readmem, SLEIC_Z80_writemem)
   MDRV_CPU_PORTS(SLEIC_Z80_readport, SLEIC_Z80_writeport)
-  MDRV_CPU_PERIODIC_INT(SLEIC_irq_z80, 2500000/2048)
+  MDRV_CPU_PERIODIC_INT(SLEIC_irq_z80, 2500000/2048.)
 MACHINE_DRIVER_END
 
 MACHINE_DRIVER_START(SLEIC1)
@@ -293,7 +292,7 @@ MACHINE_DRIVER_START(SLEIC1)
   MDRV_CPU_ADD_TAG("dcpu", I8039, 2000000)
   MDRV_CPU_MEMORY(SLEIC_8039_readmem, SLEIC_8039_writemem)
   MDRV_CPU_PORTS(SLEIC_8039_readport, SLEIC_8039_writeport)
-  MDRV_CPU_PERIODIC_INT(SLEIC_irq_i8039, 2000000/8192)
+  MDRV_CPU_PERIODIC_INT(SLEIC_irq_i8039, 2000000/8192.)
 
   MDRV_SOUND_ADD(YM3812, SLEIC_ym3812_intf)
   MDRV_SOUND_ADD(OKIM6295, SLEIC_okim6376_intf)
@@ -315,7 +314,7 @@ MACHINE_DRIVER_START(SLEIC3)
   MDRV_CPU_ADD_TAG("dcpu", I8039, 2000000)
   MDRV_CPU_MEMORY(SLEIC_8039_readmem, SLEIC_8039_writemem)
   MDRV_CPU_PORTS(SLEIC_8039_readport, SLEIC_8039_writeport)
-  MDRV_CPU_PERIODIC_INT(SLEIC_irq_i8039, 2000000/8192)
+  MDRV_CPU_PERIODIC_INT(SLEIC_irq_i8039, 2000000/8192.)
 MACHINE_DRIVER_END
 
 PINMAME_VIDEO_UPDATE(sleic_dmd_update) {
@@ -324,7 +323,7 @@ PINMAME_VIDEO_UPDATE(sleic_dmd_update) {
 
   RAM = (void *)(memory_region(SLEIC_MEMREG_CPU) + 0x60410);
   for (ii = 1; ii <= 32; ii++) {
-    UINT8 *line = &dotCol[ii][0];
+    UINT8 *line = &coreGlobals.dotCol[ii][0];
     for (jj = 0; jj < 16; jj++) {
       for (kk = 7; kk >= 0; kk--) {
         *line++ = (RAM[0]>>kk) & 1 ? 3 : 0;
@@ -337,6 +336,6 @@ PINMAME_VIDEO_UPDATE(sleic_dmd_update) {
     *line = 0;
   }
 
-  video_update_core_dmd(bitmap, cliprect, dotCol, layout);
+  video_update_core_dmd(bitmap, cliprect, layout);
   return 0;
 }

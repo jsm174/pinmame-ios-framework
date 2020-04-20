@@ -1,3 +1,5 @@
+// license:BSD-3-Clause
+
 #ifndef __FILTER_H
 #define __FILTER_H
 #if !defined(__GNUC__) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || (__GNUC__ >= 4)	// GCC supports "pragma once" correctly since 3.4
@@ -6,18 +8,8 @@
 
 #include "osd_cpu.h"
 
-/* Max filter order */
+/* Max FIR filter order */
 #define FILTER_ORDER_MAX 501
-
-/* Define to use integer calculation */
-//#define FILTER_USE_INT
-
-#ifdef FILTER_USE_INT
-typedef int filter_real;
-#define FILTER_INT_FRACT 15 /* fractional bits */
-#else
-typedef float filter_real;
-#endif
 
 #if (defined(_M_IX86_FP) && _M_IX86_FP >= 1) || defined(__SSE__) || defined(_M_X64) || defined(_M_AMD64)
  #define SSE_FILTER_OPT
@@ -26,22 +18,22 @@ typedef float filter_real;
 #endif
 
 typedef struct filter_struct {
-	filter_real xcoeffs[(FILTER_ORDER_MAX+1)/2];
+	float xcoeffs[(FILTER_ORDER_MAX+1)/2];
 	unsigned order;
 } filter;
 
 typedef struct filter_state_struct {
 	unsigned prev_mac;
-	filter_real xprev[FILTER_ORDER_MAX];
+	float xprev[FILTER_ORDER_MAX];
 } filter_state;
 
 /* Allocate a FIR Low Pass filter */
 filter* filter_lp_fir_alloc(double freq, const int order);
+/* Free the filter */
 void filter_free(filter* f);
 
 /* Allocate a filter state */
-filter_state* filter_state_alloc();
-
+filter_state* filter_state_alloc(void);
 /* Free the filter state */
 void filter_state_free(filter_state* s);
 
@@ -49,7 +41,7 @@ void filter_state_free(filter_state* s);
 void filter_state_reset(filter* f, filter_state* s);
 
 /* Insert a value in the filter state */
-INLINE void filter_insert(const filter* f, filter_state* s, const filter_real x) {
+INLINE void filter_insert(const filter* f, filter_state* s, const float x) {
 	/* next state */
 	++s->prev_mac;
 	if (s->prev_mac >= f->order)
@@ -60,26 +52,20 @@ INLINE void filter_insert(const filter* f, filter_state* s, const filter_real x)
 }
 
 /* Compute the filter output */
-filter_real filter_compute(const filter* f, const filter_state* s);
+float filter_compute(const filter* f, const filter_state* s);
 
-INLINE INT16 filter_compute_clamp16(const filter* f, const filter_state* s) {
-	const filter_real tmp = filter_compute(f, s);
-	if (tmp <= (filter_real)-32768)
-		return -32768;
-	else if (tmp >= (filter_real)32767)
-		return 32767;
-	else
-		return (INT16)tmp;
-}
+//
+// The following IIR filter is much lower computational overhead, but is more restricted to what can be done with filters that are based on it
+//
 
 /* Filter types */
 #define FILTER_LOWPASS		0
 #define FILTER_HIGHPASS		1
 #define FILTER_BANDPASS		2
 
-typedef struct filter2_context_struct {
-	double x0, x1, x2;	/* x[k], x[k-1], x[k-2], current and previous 2 input values */
-	double y0, y1, y2;	/* y[k], y[k-1], y[k-2], current and previous 2 output values */
+typedef struct filter2_context_struct { // could also be reduced to only 2 history regs: https://en.wikipedia.org/wiki/Digital_biquad_filter#Direct_form_2, but Form 1 has better characteristics apparently
+	double /*x0,*/ x1, x2;	/* x[k], x[k-1], x[k-2], current and previous 2 input values */
+	double /*y0,*/ y1, y2;	/* y[k], y[k-1], y[k-2], current and previous 2 output values */
 	double a1, a2;		/* digital filter coefficients, denominator */
 	double b0, b1, b2;	/* digital filter coefficients, numerator */
 } filter2_context;
@@ -92,31 +78,34 @@ typedef struct filter2_context_struct {
  * gain - overall filter gain. Set to 1 if not needed.
  */
 void filter2_setup(const int type, const double fc, const double d, const double gain,
-					filter2_context *filter2, const unsigned int sample_rate);
+	filter2_context * const __restrict filter2, const unsigned int sample_rate);
 
 
 /* Reset the input/output voltages to 0. */
-void filter2_reset(filter2_context *filter2);
+void filter2_reset(filter2_context * const __restrict filter2);
 
 
-/* Step the filter.
- * x0 is the new input, which needs to be set before stepping.
- * y0 is the new filter output.
- */
-INLINE void filter2_step(filter2_context * const __restrict filter2)
+/* Step the filter with input x0. */
+INLINE double filter2_step_with(filter2_context * const __restrict filter2, const double x0)
 {
-	filter2->y0 = -filter2->a1 * filter2->y1 - filter2->a2 * filter2->y2 +
-	               filter2->b0 * filter2->x0 + filter2->b1 * filter2->x1 + filter2->b2 * filter2->x2;
+	// Form 1 Biquad Section Calc
+	const double y0 = /*a0**/(filter2->b0 * x0 + filter2->b1 * filter2->x1 + filter2->b2 * filter2->x2) - filter2->a1 * filter2->y1 - filter2->a2 * filter2->y2;
 	filter2->x2 = filter2->x1;
-	filter2->x1 = filter2->x0;
+	filter2->x1 = x0;
 	filter2->y2 = filter2->y1;
-	filter2->y1 = filter2->y0;
+	filter2->y1 = y0;
+	return y0;
 }
 
 /* 
  *  Step the filter with a given input, returning the new output.
  */
-double filter2_step_with(filter2_context * const __restrict filter2, double input);
+double filter2_step_with(filter2_context * const __restrict filter2, const double input);
+
+
+// directly set digital coefficients
+void filter_setup(const double b0, const double b1, const double b2, const double a1, const double a2, // a0 = 1
+	filter2_context * const __restrict filter2);
 
 
 /* Setup a filter2 structure based on an op-amp multipole bandpass circuit.
@@ -137,8 +126,8 @@ double filter2_step_with(filter2_context * const __restrict filter2, double inpu
  *                  gnd        vRef >---'  |/
  *
  */
-void filter_opamp_m_bandpass_setup(double r1, double r2, double r3, double c1, double c2,
-					filter2_context *filter2, unsigned int sample_rate);
+void filter_opamp_m_bandpass_setup(const double r1, const double r2, const double r3, const double c1, const double c2,
+					filter2_context * const __restrict filter2, const unsigned int sample_rate);
 
 
 // Multiple Feedback Low-pass Filter
@@ -189,8 +178,8 @@ void filter_opamp_m_bandpass_setup(double r1, double r2, double r3, double c1, d
 //
 // Specify resistor values in Ohms and capacitors in Farads.
 //
-void filter_mf_lp_setup(const double r1, const double r2, const double r3, const double c1, const double c2,
-	struct filter2_context_struct *context, const int sample_rate);
+void filter_mf_lp_setup(const double R1, const double R2, const double R3, const double C1, const double C2,
+	filter2_context * const __restrict context, const int sample_rate);
 
 
 // Active single-pole low-pass filter
@@ -219,8 +208,8 @@ void filter_mf_lp_setup(const double r1, const double r2, const double r3, const
 //
 // Specify resistor values in Ohms and capacitors in Farads.
 //
-void filter_active_lp_setup(const double r1, const double r2, const double r3, const double c1,
-	struct filter2_context_struct *context, const int sample_rate);
+void filter_active_lp_setup(const double R1, const double R2, const double R3, const double C1,
+	filter2_context * const __restrict context, const int sample_rate);
 
 // Sallen-Key low-pass filter
 //
@@ -244,7 +233,7 @@ void filter_active_lp_setup(const double r1, const double r2, const double r3, c
 //
 // Specify resistor values in Ohms and capacitors in Farads.
 //
-void filter_sallen_key_lp_setup(const double r1, const double r2, const double c1, const double c2,
-	struct filter2_context_struct *context, const int sample_rate);
+void filter_sallen_key_lp_setup(const double R1, const double R2, const double C1, const double C2,
+	filter2_context * const __restrict context, const int sample_rate);
 
 #endif

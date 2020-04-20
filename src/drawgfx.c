@@ -33,7 +33,7 @@ INLINE UINT32 read_dword(void *address)
 {
 	if ((size_t)address & 3)
 	{
-  		return	(*((UINT8 *)address  ) << SHIFT0) +
+		return	(*((UINT8 *)address  ) << SHIFT0) +
 				(*((UINT8 *)address+1) << SHIFT1) +
 				(*((UINT8 *)address+2) << SHIFT2) +
 				(*((UINT8 *)address+3) << SHIFT3);
@@ -45,15 +45,15 @@ INLINE UINT32 read_dword(void *address)
 
 INLINE void write_dword(void *address, UINT32 data)
 {
-  	if ((size_t)address & 3)
+	if ((size_t)address & 3)
 	{
 		*((UINT8 *)address)   = (data>>SHIFT0);
 		*((UINT8 *)address+1) = (data>>SHIFT1);
 		*((UINT8 *)address+2) = (data>>SHIFT2);
 		*((UINT8 *)address+3) = (data>>SHIFT3);
 		return;
-  	}
-  	else
+	}
+	else
 		*(UINT32 *)address = data;
 }
 #else
@@ -5385,7 +5385,7 @@ DECLARE(copyrozbitmap_core,(struct mame_bitmap *bitmap,struct mame_bitmap *srcbi
 
 			if (startx >= srcbitmap->width)
 			{
-				sx += -startx;
+				sx -= startx;
 				startx = 0;
 			}
 

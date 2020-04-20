@@ -319,7 +319,7 @@ MACHINE_DRIVER_START(by51N)
   MDRV_SOUND_ADD(DAC, sp_dacInt)
 MACHINE_DRIVER_END
 
-static struct mc3417_interface sp_mc3417Int = { 1, {75}};
+static struct mc3417_interface sp_mc3417Int = { 1, {100}};
 
 static MEMORY_READ_START(sp56_readmem)
   { 0x0000, 0x007f, MRA_RAM },
@@ -357,9 +357,9 @@ static void sp_init(struct sndbrdData *brdData) {
   int i;
   splocals.brdData = *brdData;
   pia_config(SP_PIA0, PIA_STANDARD_ORDERING, &sp_pia);
-  if (splocals.brdData.subType == 1) { // -56 board
-    mc3417_set_gain(0, 40000);
-  }
+  //if (splocals.brdData.subType == 1) { // -56 board
+  //  mc3417_set_gain(0, 0.92);
+  //}
   for (i=0; i < 0x80; i++) memory_region(BY51_CPUREGION)[i] = 0xff;
 }
 static void sp_diag(int button) {
@@ -499,7 +499,7 @@ static MEMORY_WRITE_START(snt_writemem)
 MEMORY_END
 
 MACHINE_DRIVER_START(by61)
-  MDRV_CPU_ADD(M6802, 3579545/4)
+  MDRV_CPU_ADD(M6802, 3579545./4.)
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(snt_readmem, snt_writemem)
   MDRV_INTERLEAVE(500)
@@ -661,7 +661,7 @@ static PORT_WRITE_START(cs_writeport)
 PORT_END
 
 MACHINE_DRIVER_START(by45)
-  MDRV_CPU_ADD(M6803, 3579545/4)
+  MDRV_CPU_ADD(M6803, 3579545./4.)
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(cs_readmem, cs_writemem)
   MDRV_CPU_PORTS(cs_readport, cs_writeport)
@@ -703,10 +703,10 @@ static READ_HANDLER(cs_port2_r) {
 	int data = cslocals.ctrl | (cslocals.cmd << 1);
 	if (cslocals.p21) data |= 0x02;
 #if 0
-	if(last !=data)
+	if(last != data)
 		printf("cs_port2_r = %x\n",data);
-#endif
 	last = data;
+#endif
 	return data;
 }
 

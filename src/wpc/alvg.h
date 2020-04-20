@@ -45,7 +45,7 @@
 
 #define ALVG_COMINPORT       CORE_COREINPORT
 
-#define ALVG_SOLSMOOTH       1 /* Smooth the Solenoids over this number of VBLANKS */
+#define ALVG_SOLSMOOTH       20 /* Smooth the Solenoids over this number of VBLANKS */
 #define ALVG_LAMPSMOOTH      30 /* Smooth the lamps over this number of VBLANKS */
 
 /*-- To access C-side multiplexed solenoid/flasher --*/
@@ -78,8 +78,8 @@ extern MACHINE_DRIVER_EXTERN(alvgs2dmd2);
 extern MACHINE_DRIVER_EXTERN(alvgs2dmd3);
 
 #define mALVG         alvg
-#define mALVGS1		  alvgs1
-#define mALVGS2		  alvgs2
+#define mALVGS1       alvgs1
+#define mALVGS2       alvgs2
 #define mALVGS2DMD1   alvgs2dmd1
 #define mALVGS2DMD2   alvgs2dmd2
 #define mALVGS2DMD3   alvgs2dmd3

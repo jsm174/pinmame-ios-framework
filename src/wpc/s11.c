@@ -28,9 +28,15 @@
 #define S11_PIA4 4
 #define S11_PIA5 5
 
-#define S11_VBLANKFREQ    60 /* VBLANK frequency */
-
-#define S11_IRQFREQ     1000
+// MAME: Length of time in cycles between IRQs on the main 6808 CPU
+// This length is determined by the settings of the W14 and W15 jumpers
+// It can be 0x300, 0x380, 0x700 or 0x780 cycles long.
+// IRQ length is always 32 cycles
+//#define S11_IRQ_CYCLES     0x380
+// PinWiki: 1ms IRQ signal (W14 in) or 2ms IRQ signal (W15 in), Data East seems to be the same (J7a and J7b, where J7b corresponds to W14)
+//          Sys11: W14 in, DE: J7b in (except for Laser War CPU Rev 1, where J7a in)
+// Ed Cheung: The IRQ on System 3-11 fires every 928 usec, which perfectly matches MAMEs 0x380+32!
+#define S11_IRQFREQ     (1000000.0/928.0)
 /*-- Smoothing values --*/
 #ifdef PROC_SUPPORT
 // TODO/PROC: Make variables out of these defines. Values depend on "-proc" switch.
@@ -116,6 +122,7 @@ static void s11_piaMainIrq(int state) {
 static INTERRUPT_GEN(s11_irq) {
   s11_irqline(1); timer_set(TIME_IN_CYCLES(32,0),0,s11_irqline);
 }
+
 static INTERRUPT_GEN(s11_vblank) {
   /*-------------------------------
   /  copy local data to interface
@@ -130,7 +137,7 @@ static INTERRUPT_GEN(s11_vblank) {
     procTickleWatchdog();
   }
 #endif
-  locals.vblankCount += 1;
+  locals.vblankCount++;
   /*-- lamps --*/
   if ((locals.vblankCount % S11_LAMPSMOOTH) == 0) {
 #ifdef PROC_SUPPORT
@@ -530,7 +537,18 @@ static WRITE_HANDLER(pia4cb2_w) { setSSSol(data, 5); }
 /*---------------
 / Switch reading
 /----------------*/
-static WRITE_HANDLER(pia4b_w) { locals.swCol = data; }
+static WRITE_HANDLER(pia4b_w)
+{
+  if (locals.deGame) {
+    int x;
+    for (x=0; x<8; x++)
+      if (data & (1u << x))
+        break;
+    locals.swCol = data & (1u << x);
+  }
+  else
+    locals.swCol = data;
+}
 static READ_HANDLER(pia4a_r)  { return core_getSwCol(locals.swCol); }
 
 /*-------
@@ -703,6 +721,8 @@ int s11_m2sw(int col, int row) { return col*8+row-7; } // needed to map
 static MACHINE_INIT(s11) {
   if (core_gameData->gen & (GEN_DE | GEN_DEDMD16 | GEN_DEDMD32 | GEN_DEDMD64))
     locals.deGame = 1;
+  else
+    locals.deGame = 0;
   pia_config(S11_PIA0, PIA_STANDARD_ORDERING, &s11_pia[0]);
   pia_config(S11_PIA1, PIA_STANDARD_ORDERING, &s11_pia[1]);
   pia_config(S11_PIA2, PIA_STANDARD_ORDERING, &s11_pia[2]);
@@ -905,6 +925,17 @@ MACHINE_DRIVER_START(de_dmd162aS)
   MDRV_IMPORT_FROM(s11)
   MDRV_IMPORT_FROM(de2aas)
   MDRV_IMPORT_FROM(de_dmd16)
+  MDRV_NVRAM_HANDLER(de)
+  MDRV_DIAGNOSTIC_LEDH(1)
+  MDRV_SOUND_CMD(de_sndCmd_w)
+  MDRV_SOUND_CMDHEADING("DE")
+MACHINE_DRIVER_END
+
+/* DE 128x32 Sound 2a with hacky/tweaked DMD IRQ (LW3/AS/R&B/SW) */
+MACHINE_DRIVER_START(de_dmd322aS_hack)
+  MDRV_IMPORT_FROM(s11)
+  MDRV_IMPORT_FROM(de2aas)
+  MDRV_IMPORT_FROM(de_dmd32_hack)
   MDRV_NVRAM_HANDLER(de)
   MDRV_DIAGNOSTIC_LEDH(1)
   MDRV_SOUND_CMD(de_sndCmd_w)

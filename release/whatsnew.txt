@@ -3,13 +3,16 @@ What's new in PinMAME:
 (see whatsnewVPM.txt for the Visual PinMAME exclusive changes!)
 
 
-Version 3.3 (X X, 2020) - ""
+Version 3.3 (X X, 2020) - "20 years already?"
 ------------------------------------------------------------------------------
 
 Compiling for iOS is now possible.
 Also a new platform independent lib/dll is now available with a new, simple interface to request (some of) the internal data.
 
 *** CORE/CPU ***
+Improved Atari Generation 1 sound emulation, rewritten similar to the style of the Gen 2 one
+Tweaks to Atari Generation 2 emulation, too
+Added Regama driver
 Wico's Af-Tor fully working now
 Sped up Video Dens games, found more dip switches, switch test, saving NVRAM
 E.F.O. sound board mostly working - speech output would still stall the board for now however
@@ -21,8 +24,8 @@ Increased IRQ for LTD system III, helps with ball detection in outhole
 Corrected CPU clock for Peyper / Sonic games, helps speeding up Gamatron game start
 Doubled ZC frequency for Joctronic games, saving NVRAM
 Support 4-solenoid stepper motor mech used by High Roller Casino, Starship Troopers, and Playboy
+Fixed 8085A DSUB instruction for the H register
 Fixed a bug in the TMS9995 emulation concerning port data writes
-Fixed a default volume issue with the AY8910 / YM2203
 Make color/brightness mappings of Data East 128x16 DMDs match the real hardware
 Fix an old regression of Alvin G. solenoids not firing consistently (most notably breaking Mystery Castle)
 Improve DMD timings for the Sega 192x64 DMD, matching the real one more closely (also a slight improvement for the DE/Sega/Stern 128x32 ones)
@@ -30,15 +33,23 @@ Improve IRQ timings of Sys3/4/6/7/11, DE and the Sega 192x64 DMD-machines
 Change switch writing of DE and Sega 192x64 DMD-machines
 Improve sound filtering of Flash Gordon, Xenon and all Williams/Bally DCS machines, matching the real one more closely
 Improve timings for GTS80 machines, especially for Rack 'em up until Tag-Team (1983-85 era)
+Stabilized solenoids 16, 31, and 32 on GamePlan machines
 
-*** ROM SUPPORT *** Thanks to Soren, ipdb.org, Silvio Finotti, tecnopinball.org, inkochnito, Carlos Paredes Compan, Matt Morin, Chad Hendrickson
+*** ROM SUPPORT *** Thanks to Soren, ipdb.org, Silvio Finotti, tecnopinball.org, inkochnito, Carlos Paredes Compan, Matt Morin, Chad Hendrickson, Idleman, jordigahan, ClawGrip, Juan (Akiles)
 New:
 Jac van Ham: Formula 1
              Ice Mania
+Regama: Trebol
 Sport Matic: Flashman
+
+Correct Dumps:
+Bally: Doctor Who P-5, P-6 (using SP-4 U18 sound ROM); also L-2, D-2 (using SL-2 U18 sound ROM)
+       Twilight Zone P-3, P-4 (using later U14 and U15 sound ROMs, only PA-1 uses SP-1 sound)
+LTD: Time Machine (4 players) - confirmed that currently supported ROMs are correct
 
 Clones:
 Addams Family, The L-5C (competition MOD) (updated with LED Ghost Fix)
+Big Game (MOD rev. 7)
 Brave Team (Free Play)
 Canasta '86' (Free Play)
 Cirqus Voltaire (D.52 Prototype w/ support for old Ringmaster voice) - sound ROMs missing however
@@ -47,25 +58,30 @@ Corsario (Free Play)
 Creature from the Black Lagoon L-4C (competition MOD) (updated with LED Ghost Fix)
 Demolition Man LX-4C (competition MOD) (updated and also now includes LED Ghost Fix)
 Demolition Man H-6C (competition MOD) (updated)
+Dragonfist (MOD 3 rev. 1105)
+Flight 2000 (modified rules rev. 3335)
 Flintstones, The LX-3
-Iron Man 1.85(+Vault Edition)
+Iron Man 1.85,1.86(+Vault Editions)
 Junk Yard 1.2C (competition MOD) (updated)
 Lap By Lap (Free Play)
 Lord of the Rings, The 3.00
+Meteor (Bonus Count and Sound Fix)
+Meteor (Bonus Count Fix, MOD, Free Play rev. 64)
+Meteor (Bonus Count Fix, MOD, 7-Digit, Free Play rev. 74)
 Moon Light (Free Play)
 Mundial 90 (Free Play)
+Nine Ball (Ball handling MOD beta18)
 Oba-Oba (old hardware)
 Pool Sharks LA-7C (competition MOD) (updated)
+Raid, The (alternate set)
 Space Train (old hardware)
 Spider-Man 1.02 (English, French)
 Star Trek 25th Anniversary 3.00 (unofficial MOD)
+Star Wars 1.01
 Striker Xtreme 1.00 (Italian)
 Theatre of Magic 1.3XC (competition MOD) (updated)
+Trident (MOD rev. 23c)
 Twilight Zone L-5, LA-9 (aka PAPA Tournament Version 9.0)
-
-Correct Dumps:
-Time Machine (LTD, 4 players) - confirmed that currently supported ROMs are correct
-Twilight Zone P-3, P-4 (using later U14 and U15 sound ROMs, only PA-1 uses SP-1 sound)
 
 
 

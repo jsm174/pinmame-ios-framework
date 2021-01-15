@@ -68,9 +68,10 @@ struct mc3417_data
 	int     last_sound;
 
 #define SALLEN_KEY // specs used from Xenon & Flash Gordon schematics
+#define HACK_REMOVE_FIRST_SALLEN_KEY 0 //!! removes first stage, makes sound a bit clearer at cost of scratchiness/noise
 #ifdef SALLEN_KEY
 	// filter stages
-	filter2_context f[4];
+	filter2_context f[HACK_REMOVE_FIRST_SALLEN_KEY ? 2 : 4];
 #else // generic low-pass
 	filter* filter_f;           /* filter used, ==0 if none */
 	filter_state* filter_state; /* state of the filter */
@@ -121,12 +122,12 @@ int mc3417_sh_start(const struct MachineSound *msound)
 #ifdef SALLEN_KEY
 		fi = 0;
 		// Xenon & Flash Gordon:
+#if HACK_REMOVE_FIRST_SALLEN_KEY==0
 		for (ii = 0; ii < 2; ++ii)
-		  //filter_sallen_key_lp_setup(36000, 36000, 2200e-12, 1000e-12, &chip->f[fi++], SAMPLE_RATE);
-		  filter_setup(2.23151838311376E-03,4.46303676622753E-03,2.23151838311376E-03,-1.86781481370649,.876740887238946, &chip->f[fi++]);
+		  filter_sallen_key_lp_setup(36000, 36000, 2200e-12, 1000e-12, &chip->f[fi++], SAMPLE_RATE);
+#endif
 		for (ii = 0; ii < 2; ++ii)
-		  //filter_sallen_key_lp_setup(56000, 56000, 1000e-12,  470e-12, &chip->f[fi++], SAMPLE_RATE);
-		  filter_setup(4.20071066000835E-03,8.40142132001669E-03,4.20071066000835E-03,-1.81355854102765,.830361383667684, &chip->f[fi++]);
+		  filter_sallen_key_lp_setup(56000, 56000, 1000e-12,  470e-12, &chip->f[fi++], SAMPLE_RATE);
 #else
 		chip->filter_f = filter_lp_fir_alloc(0.05, FILTER_ORDER_MAX);
 		chip->filter_state = filter_state_alloc();
@@ -188,7 +189,7 @@ static void mc3417_update(int num, INT16 *buffer, int length)
 	if (length > SAMPLE_RATE/2048  //!! magic // PINMAME: be less conservative/more precise
 		&& chip->last_sound != 0)  // clock did not update next_value since the last update -> fade to silence (resolves clicks and simulates real DAC kinda)
 	{
-		float tmp = chip->curr_value;
+		float tmp = (float)chip->curr_value;
 		int i;
 		for (i = 0; i < length; i++, tmp *= 0.95f)
 			buffer_f[i] = tmp;
@@ -226,7 +227,7 @@ static void mc3417_update(int num, INT16 *buffer, int length)
 			// run the sample through the staged filter
 			double v = data;
 			int iii;
-			for(iii = 0; iii < 4; iii++) //!! opt.!?
+			for(iii = 0; iii < (HACK_REMOVE_FIRST_SALLEN_KEY ? 2 : 4); iii++) //!! opt.!?
 				v = filter2_step_with(&chip->f[iii], v);
 			buffer_f[i] = (float)v;
 #else

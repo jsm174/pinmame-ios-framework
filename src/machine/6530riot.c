@@ -24,6 +24,14 @@
 
 /******************* internal RIOT data structure *******************/
 
+#define RIOT6530_PORTA	0x00
+#define RIOT6530_DDRA	0x01
+#define RIOT6530_PORTB	0x02
+#define RIOT6530_DDRB	0x03
+
+#define RIOT6530_TIMER	0x00
+#define RIOT6530_IRF	0x01
+
 struct riot6530
 {
 	const struct riot6530_interface *intf;
@@ -80,7 +88,7 @@ struct riot6530
 #define C2_OUTPUT(c)			(c & 0x20)
 #define C2_INPUT(c)				(!(c & 0x20))
 
-#define IFR_DELAY 3
+#define IFR_DELAY 3 // 1 in MAME, but then Rack em up does not produce sound anymore
 
 /******************* static variables *******************/
 
@@ -110,13 +118,16 @@ void riot6530_unconfig(void)
 
 void riot6530_set_clock(int which, double clock)
 {
-	riot[which].sec_to_cycles = clock * 1.01;
+	LOG(("RIOT6530-%d clock = %.3f\n", which, clock));
+
+	riot[which].sec_to_cycles = clock;
 	riot[which].cycles_to_sec = 1.0 / riot[which].sec_to_cycles;
 }
 
 void riot6530_config(int which, const struct riot6530_interface *intf)
 {
 	if (which >= MAX_RIOT_6530) return;
+	memset(&riot[which], 0x00, sizeof(riot[which]));
 	riot[which].intf = intf;
 	riot[which].t = NULL;
 
@@ -132,6 +143,8 @@ void riot6530_config(int which, const struct riot6530_interface *intf)
 void riot6530_reset(void)
 {
 	int i;
+
+	LOG(("RIOT6530-all reset\n"));
 
 	/* zap each structure, preserving the interface and swizzle */
 	for (i = 0; i < MAX_RIOT_6530; i++)
@@ -229,7 +242,7 @@ int riot6530_read(int which, int offset)
 	offset &= 0x0f;
 
 	if ( !(offset & 0x04) ) {
-		switch( offset&0x03 ) {
+		switch( offset & 0x03 ) {
 		case RIOT6530_PORTA:
 			/* update the input */
 			if (p->intf->in_a_func) p->in_a = p->intf->in_a_func(0);
@@ -262,7 +275,7 @@ int riot6530_read(int which, int offset)
 		}
 	}
 	else {
-		switch ( offset&0x01 ) {
+		switch ( offset & 0x01 ) {
 		case RIOT6530_TIMER: {
 			int old_timer_enabled = timer_enable(p->t, 0);
 			if ( old_timer_enabled ) // was timer enabled? re-enable it
@@ -270,7 +283,7 @@ int riot6530_read(int which, int offset)
 
 			if ( old_timer_enabled ) {
 				if ( p->irq_state & RIOT_TIMERIRQ ) {
-					val = 255 - V_TIME_TO_CYCLES(timer_get_time() - p->time);
+					val = 254 - V_TIME_TO_CYCLES(timer_get_time() - p->time); // 254 is indicated by the s80btest
 				}
 				else
 					val = p->timer_start - V_TIME_TO_CYCLES(timer_get_time() - p->time) / p->timer_divider;
@@ -367,7 +380,7 @@ void riot6530_write(int which, int offset, int data)
 		}
 	}
 	else {
-		/* timer releated stuff */
+		/* timer and interrupt releated stuff */
 		p->timer_irq_enabled = offset&0x08;
 		p->timer_start = data;
 

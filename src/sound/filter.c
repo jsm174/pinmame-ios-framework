@@ -314,9 +314,7 @@ void filter2_reset(filter2_context * const __restrict filter2)
 }
 
 
-/* Step the filter. */
-
-// directly set digital coefficients
+// directly set digital coefficients, for example by using a tool like https://www.beis.de/Elektronik/Filter/AnaDigFilt/AnaDigFilt.html#AnaDigFilt
 void filter_setup(const double b0, const double b1, const double b2, const double a1, const double a2, // a0 = 1
 	filter2_context * const __restrict context)
 {
@@ -330,7 +328,7 @@ void filter_setup(const double b0, const double b1, const double b2, const doubl
 	filter2_reset(context);
 }
 
-/* Setup a filter2 structure based on an op-amp multipole bandpass circuit. */
+/* Set up a filter2 structure based on an op-amp multipole bandpass circuit. */
 void filter_opamp_m_bandpass_setup(const double r1, const double r2, const double r3, const double c1, const double c2,
 	filter2_context * const __restrict filter2, const unsigned int sample_rate)
 {
@@ -359,6 +357,84 @@ void filter_opamp_m_bandpass_setup(const double r1, const double r2, const doubl
 
 	filter2_setup(FILTER_BANDPASS, fc, d, gain, filter2, sample_rate);
 }
+
+// General filter2 biquad setup.  The biquad transform is characterized
+// by the reference point for the frequency warping, f0, and by the coefficients
+// c1 and c2 in the generic continuous-time transfer function:
+//
+//                    1
+//  H(s) = K * -----------------
+//             1 + c1*s + c2*s^2
+//
+// The appropriate f0 reference frequency for a low-pass filter is generally 
+// the  corner frequency, usually denoted Fc, also known as the cut-off frequency.
+// The warping frequency is the point where the response of the digital and 
+// analog versions of the filter match exactly, and the best results for
+// low-pass filters are usually at the corner frequency.
+//
+static void filter2_biquad_setup(const double f0, const double c1, const double c2, filter2_context * const __restrict context, const int sample_rate)
+{
+	double gn, cc;
+
+	// figure radians from frequency
+	double w0 = f0 * (2.0 * PI);
+
+	// keep it in -PI/T .. PI/T
+	const double wdMax = PI * sample_rate;
+	if (w0 > wdMax)
+		w0 -= 2.0 * wdMax;
+
+	// calculate the time step factor, pre-warping to f0
+	gn = w0 / tan(w0 / (2 * sample_rate));
+	//gn = 2 * sample_rate; // without pre-warping
+
+	// calculate the difference equation coefficients
+	cc = 1.0 + gn*c1 + gn*gn*c2;
+	context->b0 = 1.0 / cc;
+	context->b1 = 2.0 / cc;
+	context->b2 = 1.0 / cc;
+	context->a1 = 2.0 * (1.0 - gn*gn*c2) / cc;
+	context->a2 = (1.0 - gn*c1 + gn*gn*c2) / cc;
+
+	// reset the inputs
+	filter2_reset(context);
+}
+
+//
+// Passive RC low-pass filter (set R2 & R3 = 0 for first variant)
+//
+//
+// Vin --- R1 --- + --- Vout   or    Vin --- R1 --- + --- R2 --- +
+//                |                                 |            |
+//                C1                                C1           R3 --- Vout
+//                |                                 |            |
+//               GND                               GND          GND
+//
+void filter_rc_lp_setup(const double R1, const double R2, const double R3, const double C1,
+	filter2_context * const __restrict context, const int sample_rate)
+{
+	// Continuous-time transfer function for the analog filter:
+	//
+	//            1/(C1*R1)
+	//  H(s) = ---------------
+	//          s + 1/(C1*R1)
+	//
+	// Refactoring to canonical form:
+	//
+	//             1
+	//   H(s) = ---------
+	//          1 + c1*s
+	//
+	const double R = (R2 + R3 > 0.) ? (R1*(R2 + R3)) / (R1 + R2 + R3) : R1;
+	const double c1 = C1*R;
+
+	// calculate the cutoff frequency for the filter
+	const double Fc = 1.0 / ((2.0 * PI) * c1);
+
+	// set up the biquad filter parameters
+	filter2_biquad_setup(Fc, c1, 0.0, context, sample_rate);
+}
+
 
 //
 // Multiple feedback active low pass filter
@@ -403,21 +479,8 @@ void filter_mf_lp_setup(const double R1, const double R2, const double R3, const
 	// calculate the cutoff frequency for the filter
 	const double Fc = 1.0 / ((2.0 * PI) * sqrt(c2));
 
-	// calculate the time step factor
-	const double g = 1.0 / tan(PI * Fc / sample_rate);
-	const double gn = g * (2.0 * PI) * Fc;
-
-	// Now we can calculate the difference equation coefficients from
-	// the continuous-time transfer function coefficients.
-	const double cc = 1.0 + gn*c1 + gn*gn*c2;
-	context->b0 = 1.0 / cc;
-	context->b1 = 2.0 / cc;
-	context->b2 = 1.0 / cc;
-	context->a1 = 2.0 * (1.0 - gn*gn*c2) / cc;
-	context->a2 = (1.0 - gn*c1 + gn*gn*c2) / cc;
-
-	// reset the filter inputs
-	filter2_reset(context);
+	// set up the biquad parameters
+	filter2_biquad_setup(Fc, c1, c2, context, sample_rate);
 }
 
 // 
@@ -461,20 +524,8 @@ void filter_active_lp_setup(const double R1, const double R2, const double R3, c
 	// calculate the cutoff frequency for the filter
 	const double Fc = 1.0 / ((2.0 * PI) * c1);
 
-	// calculate the time step factor
-	const double g = 1.0 / tan(PI * Fc / sample_rate);
-	const double gn = g * (2.0 * PI) * Fc;
-
-	// calculate the difference equation coefficients
-	const double cc = 1.0 + gn*c1;
-	context->b0 = 1.0 / cc;
-	context->b1 = 2.0 / cc;
-	context->b2 = 1.0 / cc;
-	context->a1 = 2.0 / cc;
-	context->a2 = (1.0 - gn*c1) / cc;
-
-	// reset the inputs
-	filter2_reset(context);
+	// set up the biquad parameters
+	filter2_biquad_setup(Fc, c1, 0.0, context, sample_rate);
 }
 
 // Sallen-Key low-pass filter
@@ -513,21 +564,8 @@ void filter_sallen_key_lp_setup(const double R1, const double R2, const double C
 	const double c2 = R1*R2*C1*C2;
 
 	// calculate the cutoff frequency for the filter
-	const double Fc = 1.0 / ((2.0 * PI) * c1);
+	const double Fc = 1.0 / ((2.0 * PI) * sqrt(c2));
 
-	// calculate the time step factor
-	const double g = 1.0 / tan(PI * Fc / sample_rate);
-	const double gn = g * (2.0 * PI) * Fc;
-
-	// Now we can calculate the difference equation coefficients from
-	// the continuous-time transfer function coefficients.
-	const double cc = 1.0 + gn*c1 + gn*gn*c2;
-	context->b0 = 1.0 / cc;
-	context->b1 = 2.0 / cc;
-	context->b2 = 1.0 / cc;
-	context->a1 = 2.0 * (1.0 - gn*gn*c2) / cc;
-	context->a2 = (1.0 - gn*c1 + gn*gn*c2) / cc;
-
-	// reset the inputs
-	filter2_reset(context);
+	// set up the biquad parameters
+	filter2_biquad_setup(Fc, c1, c2, context, sample_rate);
 }

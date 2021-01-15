@@ -484,6 +484,7 @@ DRIVER(lw3,207)         //Data East MPU: 08/92 Lethal Weapon (2.07 Canadian)
 DRIVER(lw3,208)         //Data East MPU: 11/92 Lethal Weapon (2.08)
 DRIVER(lw3,208p)        //Data East MPU: 04/13 Lethal Weapon (2.08p, Voices Mod)
 DRIVER(aar,101)         //Data East MPU: 12/92 Aaron Spelling (1.01)
+DRIVER(stwr,101)        //Data East MPU: 10/92 Star Wars (1.01)
 DRIVER(stwr,g11)        //Data East MPU: 10/92 Star Wars (1.01 German)
 DRIVER(stwr,102)        //Data East MPU: 11/92 Star Wars (1.02)
 DRIVER(stwr,e12)        //Data East MPU: 11/92 Star Wars (1.02 English)
@@ -1104,6 +1105,7 @@ DRIVERNV(megaaton)      // 04/84 Meg-Aaton
 DRIVERNV(megaatoa)      //       Meg-Aaton (alternate set)
 DRIVERNV(nautilus)      // ??/84 Nautilus
 DRIVERNV(theraid)       // ??/84 The Raid
+DRIVERNV(theraida)      // ??/84 The Raid (alternate set)
 DRIVERNV(ufo_x)         // 11/84 UFO-X
 DRIVERNV(kz26)          // ??/85 KZ-26
 DRIVERNV(rock2500)      // ??/85 Rock 2500
@@ -1114,6 +1116,11 @@ DRIVERNV(trailer)       // ??/85 Trailer
 DRIVERNV(fldragon)      // ??/86 Flash Dragon
 DRIVERNV(phntmshp)      // ??/87 Phantom Ship
 DRIVERNV(sklflite)      // ??/87 Skill Flight
+
+// ----------------
+// REGAMA
+// ----------------
+DRIVERNV(trebol)        //Trebol (1985)
 
 // ----------------
 // ROWAMET
@@ -1284,6 +1291,7 @@ DRIVERNV(draculfp)      //MPU-100: 01/79 Dracula (Free Play)
 DRIVERNV(trident)       //MPU-100: 03/79 Trident
 DRIVERNV(tridenta)      //MPU-100: 03/79 Trident (Old)
 DRIVERNV(tridenfp)      //MPU-100: 03/79 Trident (Old Free Play)
+DRIVERNV(tridentb)      //MPU-100: 01/09 Trident (MOD rev. 23c)
 DRIVERNV(hothand)       //MPU-100: 06/79 Hot Hand
 DRIVERNV(hothanfp)      //MPU-100: 06/79 Hot Hand (Free Play)
 DRIVERNV(magic)         //MPU-100: 08/79 Magic
@@ -1292,13 +1300,16 @@ DRIVERNV(princess)      //MPU-100: 08/79 Cosmic Princess
 DRIVERNV(princefp)      //MPU-100: 08/79 Cosmic Princess (Free Play)
 // MPU-200 - Sound Board: SB-300
 DRIVERNV(meteor)        //MPU-200: 09/79 Meteor
-DRIVERNV(meteora)       //MPU-200: ??/?? Meteor (Bugfix)
-DRIVERNV(meteorbf)      //MPU-200: 05/09 Meteor (Bonus Count Fix, 'Fixes a rare bug where the bonus seems to countdown endlessly')
+DRIVERNV(meteora)       //MPU-200: ??/?? Meteor (Bonus Count Official Fix)
+DRIVERNV(meteorbf)      //MPU-200: 05/09 Meteor (Bonus Count Fix)
 DRIVERNV(meteorfp)      //MPU-200: 09/79 Meteor (Free Play)
 DRIVERNV(meteorns)      //MPU-200: 08/11 Meteor (No Background Sound)
 DRIVERNV(meteorb)       //MPU-200: 11/03 Meteor (7-Digit conversion)
 DRIVERNV(meteorc)       //MPU-200: 11/03 Meteor (7-Digit conversion Free Play)
 DRIVERNV(meteord)       //MPU-200: 05/05 Meteor (/10 Scoring)
+DRIVERNV(meteora2)      //MPU-200: 08/19 Meteor (Bonus Count and Sound Fix)
+DRIVERNV(meteore)       //MPU-200: 12/19 Meteor (Bonus Count Fix, MOD, Free Play rev. 64)
+DRIVERNV(meteore7)      //MPU-200: 12/19 Meteor (Bonus Count Fix, MOD, 7-Digit, Free Play rev. 74)
 DRIVERNV(galaxy)        //MPU-200: 01/80 Galaxy
 DRIVERNV(galaxyps)      //MPU-200: 08/11 Galaxy (Planet Skillshot)
 DRIVERNV(galaxyfp)      //MPU-200: 01/80 Galaxy (Free Play)
@@ -1307,6 +1318,7 @@ DRIVERNV(ali)           //MPU-200: 03/80 Ali
 DRIVERNV(alifp)         //MPU-200: 03/80 Ali (Free Play)
 DRIVERNV(biggame)       //MPU-200: 03/80 Big Game
 DRIVERNV(biggamfp)      //MPU-200: 03/80 Big Game (Free Play)
+DRIVERNV(biggameb)      //MPU-200: 11/19 Big Game (MOD rev. 7)
 DRIVERNV(seawitch)      //MPU-200: 05/80 Seawitch
 DRIVERNV(seawitfp)      //MPU-200: 05/80 Seawitch (Free Play)
 DRIVERNV(cheetah)       //MPU-200: 06/80 Cheetah (Black cabinet)
@@ -1321,8 +1333,10 @@ DRIVERNV(stargzfp)      //MPU-200: 08/80 Star Gazer (Free Play)
 DRIVERNV(stargzrb)      //MPU-200: 03/06 Star Gazer (modified rules rev. 9)
 DRIVERNV(flight2k)      //MPU-200: 10/80 Flight 2000
 DRIVERNV(flightfp)      //MPU-200: 10/80 Flight 2000 (Free Play)
+DRIVERNV(flight2m)      //MPU-200: 04/20 Flight 2000 (modified rules rev. 3335)
 DRIVERNV(nineball)      //MPU-200: 12/80 Nine Ball
 DRIVERNV(ninebafp)      //MPU-200: 12/80 Nine Ball (Free Play)
+DRIVERNV(ninebala)      //MPU-200: 04/20 Nine Ball (Ball handling MOD beta18)
 DRIVERNV(ninebalb)      //MPU-200: 01/07 Nine Ball (modified rules rev. 85)
 DRIVERNV(freefall)      //MPU-200: 01/81 Freefall
 DRIVERNV(freefafp)      //MPU-200: 01/81 Freefall (Free Play)
@@ -1340,6 +1354,7 @@ DRIVERNV(dragfist)      //MPU-200: 01/82 Dragonfist
 DRIVERNV(dragfifp)      //MPU-200: 01/82 Dragonfist (Free Play)
 DRIVERNV(dragfisb)      //MPU-200: 01/82 Dragonfist (MOD - modified to match instruction card/manual)
 DRIVERNV(dragfib2)      //MPU-200: 01/82 Dragonfist (MOD 2 - modified to match instruction card/manual)
+DRIVERNV(dragfis3)      //MPU-200: 03/20 Dragonfist (MOD 3 rev. 1105)
 DRIVERNV(orbitor1)      //MPU-200: 04/82 Orbitor 1
 DRIVERNV(orbitofp)      //MPU-200: 04/82 Orbitor 1 (Free Play)
 DRIVERNV(orbitora)      //MPU-200: 04/82 Orbitor 1 (MOD)
@@ -1376,7 +1391,7 @@ DRIVERNV(austini)       //Whitestar: 05/01 Austin Powers (3.02 Italian)
 DRIVERNV(aust301)       //Whitestar: 05/01 Austin Powers (3.01)
 DRIVERNV(aust300)       //Whitestar: 05/01 Austin Powers (3.00)
 DRIVERNV(aust201)       //Whitestar: 05/01 Austin Powers (2.01)
-DRIVERNV(monopoly)      //Whitestar: 09/01 Monopoly (3.20)
+DRIVERNV(monopoly)      //Whitestar: 09/01 Monopoly (3.20) // 3.20 has the broken dice
 DRIVERNV(monopolg)      //Whitestar: 09/01 Monopoly (3.20 German)
 DRIVERNV(monopoll)      //Whitestar: 09/01 Monopoly (3.20 Spanish)
 DRIVERNV(monopolf)      //Whitestar: 09/01 Monopoly (3.20 French)
@@ -1924,8 +1939,10 @@ DRIVER(im,181)          //S.A.M.: 07/14 Iron Man - V1.81
 DRIVER(im,182)          //S.A.M.: 07/14 Iron Man - V1.82
 DRIVER(im,183)          //S.A.M.: 08/14 Iron Man - V1.83
 DRIVER(im,183ve)        //S.A.M.: 08/14 Iron Man - V1.83 Vault Edition
-DRIVER(im, 185)          //S.A.M.: 03/20 Iron Man - V1.85
-DRIVER(im, 185ve)        //S.A.M.: 03/20 Iron Man - V1.85 Vault Edition
+DRIVER(im,185)          //S.A.M.: 03/20 Iron Man - V1.85
+DRIVER(im,185ve)        //S.A.M.: 03/20 Iron Man - V1.85 Vault Edition
+DRIVER(im,186)          //S.A.M.: 04/20 Iron Man - V1.86
+DRIVER(im,186ve)        //S.A.M.: 04/20 Iron Man - V1.86 Vault Edition
 //DRIVER(avr,100)         //S.A.M.: 08/10 Avatar - V1.00
 //DRIVER(avr,100h)        //S.A.M.: 12/10 Avatar - V1.00 Limited Edition
 //DRIVER(avr,101)         //S.A.M.: 08/10 Avatar - V1.01

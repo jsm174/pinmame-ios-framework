@@ -131,9 +131,9 @@ MEMORY_WRITE_START(GTS80S_writemem)
 { 0xf800, 0xffff, MWA_ROM},
 MEMORY_END
 
-static void GTS80S_Update(int num, INT16 *buffer, int length) // El Dorado City of Gold, Black Hole (Sound Only), Volcano (Sound Only), Panthera, etc
+static void GTS80S_Update(int num, INT16 * const buffer, int length) // El Dorado City of Gold, Black Hole (Sound Only), Volcano (Sound Only), Panthera, etc
 {
-	float* __restrict buffer_f = (float*)buffer;
+	float * __restrict buffer_f = (float*)buffer;
 
 	double dCurrentClock = GTS80S_locals.clock[0];
 
@@ -180,7 +180,7 @@ void gts80s_init(struct sndbrdData *brdData) {
 	GTS80S_locals.clock[0]  = 0;
 	GTS80S_locals.buffer[0] = 0;
 	GTS80S_locals.buf_pos   = 1;
-	GTS80S_locals.filter_f = filter_lp_fir_alloc(0.3, FILTER_ORDER_MAX); // 0.3 = magic
+	GTS80S_locals.filter_f = filter_lp_fir_alloc(0.15, FILTER_ORDER_MAX); // 0.15 = magic
 	GTS80S_locals.filter_state = filter_state_alloc(); //!! leaks!
 	filter_state_reset(GTS80S_locals.filter_f, GTS80S_locals.filter_state);
 
@@ -268,19 +268,32 @@ const struct sndbrdIntf gts80sIntf = {
   "GTS80", gts80s_init, gts80s_exit, gts80s_diag, gts80s_data_w, gts80s_data_w, NULL, NULL, NULL, SNDBRD_NODATASYNC|SNDBRD_NOCTRLSYNC
 };
 
-// Both CPUs do not feature a "clean" clock, but get it from a R/C,
+// Both CPUs do not feature a "clean" clock, but get it from a (crappy) R/C,
 // at roughly R * C * ~5 in milliseconds.
 
-// Old board:
+// Old board (some GTS1, and GTS80):
 // C = 10 pF
-// R = 22,1 kOhm
+// R = 22.1 kOhm
+// = these components should produce 870 kHz to 920 kHz in a clean environment/modern components (flipprojets: tested via 50 ceramic capacitors, majority at 890-900kHz)
+// additional single datapoint from a real board: measured as ~800kHz by Bontango
 
-// New board:
+// New board/Piggyback:
 // C = 10 pF
-// R = 28 kOhm
+// R = 28 kOhm (Bontango: 28.8 via a 24.1 + 4.7 in row)
+// = these components should produce 660 kHz to 710 kHz in a clean environment/modern components (flipprojets: tested via 50 ceramic capacitors, majority at 675-685kHz)
+// additional single datapoint from a real board: measured as ~675kHz by Bontango
+
+// BUT:
+// according to the flipprojets guys:
+// several tested earlier old boards even ran at ~1MHz in practice! (maybe due to crappy capacitors?) Also PinMAME previously used this 1MHz!
+// thus, apparently the R was replaced with the 28 one in the piggybacks to slow down the ~1MHz to be closer to ~895kHz!
+// and reverse engineering the 6530 code (Sys1 & Sys80) also determines an expected frequency of ~893kHz
+// so their recommendation is to rather use the intended ~895kHz (like later sound boards did, and what also the main Sys80 CPU uses) everywhere
+
+// note that due to all of that madness with the R/C clock, comparing to videos from real life is always fuzzy as it is unknown which components are used in the board of the videos!
 
 MACHINE_DRIVER_START(gts80s_s)
-  MDRV_CPU_ADD_TAG("scpu", M6502, 904977.376)
+  MDRV_CPU_ADD_TAG("scpu", M6502, 904977.376) //!! somewhere between 893000 - 1000000, maybe even make this dependent on release date of game?? (earlier = higher)
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(GTS80S_readmem, GTS80S_writemem)
   MDRV_INTERLEAVE(50)
@@ -290,7 +303,7 @@ MACHINE_DRIVER_END
 
 MACHINE_DRIVER_START(gts80s_sp) // with Piggyback
   MDRV_IMPORT_FROM(gts80s_s)
-  MDRV_CPU_REPLACE("scpu", M6502, 960000) // should actually be 714285.714 Hz if schematic is correct but real games play a lot faster!)
+  MDRV_CPU_REPLACE("scpu", M6502, 961538.462) //!! somewhere between 680000 - 895000, but weirdly 960kHz also sounds good for some games?!?
 MACHINE_DRIVER_END
 
 
@@ -661,7 +674,7 @@ const struct sndbrdIntf gts80ssIntf = {
 };
 
 MACHINE_DRIVER_START(gts80s_ss)
-  MDRV_CPU_ADD_TAG("scpu", M6502, 3579545./4.)
+  MDRV_CPU_ADD_TAG("scpu", M6502, 3579545./4.) // verified by Bontango on real HW (~892KHz)
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(GTS80SS_readmem, GTS80SS_writemem)
   MDRV_INTERLEAVE(50)
@@ -1749,7 +1762,7 @@ MACHINE_DRIVER_START(techno)
   MDRV_SOUND_ADD(DAC, techno_6502dacInt)
 
   //MDRV_CPU_ADD(TMS7000, 4000000)
-  MDRV_CPU_ADD(TMS7000, 1500000)		//Sounds much better at 1.5Mhz than 4Mhz
+  MDRV_CPU_ADD(TMS7000, 1500000) //!! Sounds much better at 1.5Mhz than 4Mhz
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(tms_readmem, tms_writemem)
   MDRV_CPU_PORTS(tms_readport, tms_writeport)

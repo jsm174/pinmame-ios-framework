@@ -594,6 +594,7 @@ YM2203 Japanese datasheet contents, translated: http://www.larwe.com/technical/c
 #include "driver.h"
 #include "ay8910.h"
 #include "state.h"
+#include "../ext/vgm/vgmwrite.h"
 
 #define MAX_OUTPUT 0x7fff
 
@@ -636,6 +637,7 @@ struct AY8910
 #ifdef SINGLE_CHANNEL_MIXER
 	unsigned int mix_vol[3];
 #endif
+	unsigned short vgm_idx;
 };
 
 /* register id's */
@@ -667,6 +669,7 @@ static void _AYWriteReg(int n, int r, int v)
 	struct AY8910 *PSG = &AYPSG[n];
 	int old;
 
+	vgm_write(PSG->vgm_idx, 0x00, r, v);
 
 	PSG->Regs[r] = v;
 
@@ -1259,16 +1262,16 @@ static void AY8910Update(int chip,
 }
 
 
-void AY8910_set_clock(int chip, int clock)
+void AY8910_set_clock(int chip, double clock)
 {
 	struct AY8910 *PSG = &AYPSG[chip];
 
 #ifdef SINGLE_CHANNEL_MIXER
-	stream_set_sample_rate(PSG->Channel, clock/8);
+	stream_set_sample_rate(PSG->Channel, clock/8.);
 #else
 	int ch;
 	for (ch = 0; ch < 3; ch++)
-		stream_set_sample_rate(PSG->Channel + ch, clock/8);
+		stream_set_sample_rate(PSG->Channel + ch, clock/8.);
 #endif
 }
 
@@ -1338,9 +1341,10 @@ void AY8910_sh_reset(void)
 }
 
 static int AY8910_init(const char *chip_name,int chip,
-		int clock,int volume,int sample_rate,
+		double clock,int volume,
 		mem_read_handler portAread,mem_read_handler portBread,
-		mem_write_handler portAwrite,mem_write_handler portBwrite)
+		mem_write_handler portAwrite,mem_write_handler portBwrite,
+		int sound_type)
 {
 	struct AY8910 *PSG = &AYPSG[chip];
 	int i;
@@ -1353,14 +1357,16 @@ static int AY8910_init(const char *chip_name,int chip,
 	const char *name[3];
 	int vol[3];
 #endif
+	unsigned char chp_tp_vgm;
 
+	double sample_rate; // = Machine->sample_rate
 	/* the step clock for the tone and noise generators is the chip clock    */
 	/* divided by 8; for the envelope generator of the AY-3-8910, it is half */
 	/* that much (clock/16), but the envelope of the YM2149 goes twice as    */
 	/* fast, therefore again clock/8.                                        */
 // causes crashes with YM2610 games - overflow?
 //	if (options.use_filter)
-		sample_rate = clock/8;
+		sample_rate = clock/8.;
 
 	memset(PSG,0,sizeof(struct AY8910));
 	PSG->PortAread = portAread;
@@ -1385,6 +1391,55 @@ static int AY8910_init(const char *chip_name,int chip,
 
 	if (PSG->Channel == -1)
 		return 1;
+
+	if (sound_type == SOUND_AY8910) chp_tp_vgm = 0x00;
+#ifdef SOUND_AY8912
+	else if (sound_type == SOUND_AY8912) chp_tp_vgm = 0x01;
+#endif
+#ifdef SOUND_AY8913
+	else if (sound_type == SOUND_AY8913) chp_tp_vgm = 0x02;
+#endif
+#ifdef SOUND_AY8930
+	else if (sound_type == SOUND_AY8930) chp_tp_vgm = 0x03;
+#endif
+#ifdef SOUND_AY8914
+	else if (sound_type == SOUND_AY8914) chp_tp_vgm = 0x04;
+#endif
+#ifdef SOUND_YM2149
+	else if (sound_type == SOUND_YM2149) chp_tp_vgm = 0x10;
+#endif
+#ifdef SOUND_YM3439
+	else if (sound_type == SOUND_YM3439) chp_tp_vgm = 0x11;
+#endif
+#ifdef SOUND_YMZ284
+	else if (sound_type == SOUND_YMZ284) chp_tp_vgm = 0x12;
+#endif
+#ifdef SOUND_YMZ294
+	else if (sound_type == SOUND_YMZ294) chp_tp_vgm = 0x13;
+#endif
+	else if (sound_type == SOUND_YM2203) chp_tp_vgm = 0x20;
+#ifdef SOUND_YM2608
+	else if (sound_type == SOUND_YM2608) chp_tp_vgm = 0x21;
+#endif
+#if defined(SOUND_YM2610) || defined(SOUND_YM2610B)
+	else if (sound_type == SOUND_YM2610 || sound_type == SOUND_YM2610B) chp_tp_vgm = 0x22;
+#endif
+	else chp_tp_vgm = 0xFF;
+
+	if (! (chp_tp_vgm & 0x20))
+	{
+		PSG->vgm_idx = vgm_open(VGMC_AY8910, clock);
+		vgm_header_set(PSG->vgm_idx, 0x00, chp_tp_vgm);
+#define AY8910_LEGACY_OUTPUT        (0x01)
+		vgm_header_set(PSG->vgm_idx, 0x01, AY8910_LEGACY_OUTPUT); //!! intf->flags);
+		vgm_header_set(PSG->vgm_idx, 0x10, 1000); //!! intf->res_load[0]);
+		vgm_header_set(PSG->vgm_idx, 0x11, 1000); //!! intf->res_load[1]);
+		vgm_header_set(PSG->vgm_idx, 0x12, 1000); //!! intf->res_load[2]);
+	}
+	else
+	{
+		PSG->vgm_idx = 0xFFFF;
+	}
 
 	return 0;
 }
@@ -1444,9 +1499,9 @@ int AY8910_sh_start(const struct MachineSound *msound)
 	{
 		if (AY8910_init(sound_name(msound),chip+ym_num,intf->baseclock,
 				intf->mixing_level[chip] & 0xffff,
-				Machine->sample_rate,
 				intf->portAread[chip],intf->portBread[chip],
-				intf->portAwrite[chip],intf->portBwrite[chip]) != 0)
+				intf->portAwrite[chip],intf->portBwrite[chip],
+				msound->sound_type) != 0)
 			return 1;
 		build_mixer_table(chip+ym_num);
 
@@ -1473,12 +1528,11 @@ int AY8910_sh_start_ym(const struct MachineSound *msound)
 	{
 		if (AY8910_init(sound_name(msound),chip+num,intf->baseclock,
 				intf->mixing_level[chip] & 0xffff,
-				Machine->sample_rate,
 				intf->portAread[chip],intf->portBread[chip],
-				intf->portAwrite[chip],intf->portBwrite[chip]) != 0)
+				intf->portAwrite[chip],intf->portBwrite[chip],
+				msound->sound_type) != 0)
 			return 1;
 		build_mixer_table(chip+num);
-
 
 		AY8910_statesave(chip+num);
 	}

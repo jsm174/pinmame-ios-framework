@@ -3,7 +3,7 @@
 
 struct TMS5110interface
 {
-	int baseclock;				/* clock rate = 80 * output sample rate,     */
+	double baseclock;			/* clock rate = 80 * output sample rate,     */
 								/* usually 640000 for 8000 Hz sample rate or */
 								/* usually 800000 for 10000 Hz sample rate.  */
 	int mixing_level;
@@ -22,7 +22,7 @@ READ_HANDLER( tms5110_status_r );
 int tms5110_ready_r(void);
 
 void tms5110_reset(void);
-void tms5110_set_frequency(int frequency);
+void tms5110_set_frequency(double frequency);
 
 #endif
 

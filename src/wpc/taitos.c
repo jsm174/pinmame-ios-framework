@@ -11,7 +11,7 @@
 / Taito Sound System
 / Taito uses four different sound boards:
 / - sintetizador
-/ - sintevox (sintetizador with an additional SC-01)
+/ - sintevox (sintetizador with an additional SC-01A)
 / - sintetizador with a daughter board installed
 / - sintevox with a daughter board installed
 /
@@ -43,17 +43,17 @@ MEMORY_READ_START(taitos_readmem)
   { 0x0000, 0x007f, MRA_RAM },
   { 0x0080, 0x03ff, MRA_NOP },
   { 0x0400, 0x0403, pia_r(SP_PIA0) },
-  { 0x0800, 0x1fff, MRA_ROM }, // 0x800 - 0xfff for sureshot
+  { 0x0800, 0x1fff, MRA_ROM }, // 0x800 - 0xfff for sureshot and football
   { 0x2000, 0x3fff, MRA_ROM }, // for sharkt & lunelle
   { 0x7800, 0x7fff, MRA_ROM }, // for shock
-  { 0x8400, 0x8403, pia_r(SP_PIA0) }, // for shock
+  { 0x8400, 0x8403, pia_r(SP_PIA0) }, // for shock and football
   { 0xf800, 0xffff, MRA_ROM }, // reset vector
 MEMORY_END
 
 MEMORY_WRITE_START(taitos_writemem)
   { 0x0000, 0x007f, MWA_RAM },
   { 0x0400, 0x0403, pia_w(SP_PIA0) },
-  { 0x8400, 0x8403, pia_w(SP_PIA0) }, // for shock
+  { 0x8400, 0x8403, pia_w(SP_PIA0) }, // for shock and football
 MEMORY_END
 
 static void taitos_irq(int state) {
@@ -108,7 +108,7 @@ static WRITE_HANDLER(pia0cb2_w)
 {
 	logerror("pia0cb2_w: %x\n", data);
 	if (data && (taitos_locals.brdData.subType & 0x01) == SINTEVOX)
-		votraxsc01_w(0, taitos_locals.votrax_data);
+		votraxsc01_w(0, taitos_locals.votrax_data); // seems to be also including inflection, at least on hawkman (1,2) and cavailero negro (1)
 }
 
 static void votrax_busy(int state)
@@ -141,6 +141,16 @@ static void taitos_init(struct sndbrdData *brdData)
 	pia_reset();
 }
 
+static void reset_cpu(int state) {
+	cpu_set_halt_line(0, 0);
+}
+
+static void taitos_diag(int state) {
+	cpu_set_halt_line(0, 1);
+	timer_set(5, 0, reset_cpu);
+	cpu_set_nmi_line(taitos_locals.brdData.cpuNo, state ? PULSE_LINE : CLEAR_LINE);
+}
+
 struct DACinterface TAITO_dacInt =
 {
   1,			/* 1 Chip */
@@ -149,8 +159,8 @@ struct DACinterface TAITO_dacInt =
 
 struct VOTRAXSC01interface TAITO_votrax_sc01_interface = {
 	1,						/* 1 chip */
-	{ 50 },					/* master volume */
-	{ 8000 },				/* dynamically changing this is currently not supported */
+	{ 75 },					/* master volume */ // OLD_VOTRAX 50
+	{ 720000 },				/* dynamically changing this is currently not supported */ // 'About the SC01, it does not have an external oscillator' // OLD_VOTRAX: 8000
 	{ &votrax_busy }		/* set NMI when busy signal get's low */
 };
 
@@ -158,11 +168,11 @@ struct VOTRAXSC01interface TAITO_votrax_sc01_interface = {
 / exported interface
 /--------------------*/
 const struct sndbrdIntf taitoIntf = {
-  "TAITO", taitos_init, NULL, NULL, taitos_data_w, taitos_data_w, NULL, NULL, NULL, SNDBRD_NODATASYNC|SNDBRD_NOCTRLSYNC
+  "TAITO", taitos_init, NULL, taitos_diag, taitos_data_w, taitos_data_w, NULL, NULL, NULL, SNDBRD_NODATASYNC|SNDBRD_NOCTRLSYNC
 };
 
 MACHINE_DRIVER_START(taitos_sintetizador)
-  MDRV_CPU_ADD_TAG("scpu", M6802, 600000) // 0.6 MHz ???
+  MDRV_CPU_ADD_TAG("scpu", M6802, 600000) // 'The oscillator frequency of the 74123 is around 2.4MHz. Internally, the processor divides that frequency by 4, resulting in 600KHz.'
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(taitos_readmem, taitos_writemem)
   MDRV_INTERLEAVE(50)
@@ -232,7 +242,7 @@ static READ_HANDLER(unknown100d)
 
 struct AY8910interface TAITO_ay8910Int = {
 	2,			/* 2 chips */
-	2000000,	/* 2 MHz */
+	2000000,	/* 2 MHz */  //!! MAME has XTAL(3'579'545)/2 as guess
 	{ 30, 30 }, /* Volume */
 	{ 0 },
 	{ 0 },

@@ -1,3 +1,5 @@
+// license:BSD-3-Clause
+
 /**********************************************************************************************
  *
  *   SGS-Thomson Microelectronics M114S/M114A/M114AF Digital Sound Generator
@@ -587,7 +589,7 @@ int M114S_sh_start(const struct MachineSound *msound)
 			// M114AF 6 Mhz
 			case 6000000:
 			case 5994560: // from datasheet: 5.99456 MHz
-				m114schip[i].reset_cycles = 6000000 * 0.000085;	// Chip resets in 85us (microseconds)
+				m114schip[i].reset_cycles = intf->baseclock[i] * 0.000085;	// Chip resets in 85us (microseconds)
 				m114schip[i].is_M114A = 0;
 				LOG(("M114S Chip #%d - 6Mhz chip clock not fully supported/tested at this time!\n", i));
 				return 1;
@@ -714,7 +716,7 @@ static void process_channel_data(struct M114SChip *chip)
 	chip->bytes_read = 0;
 
 	//Copy data to the appropriate channel registers from our temp channel registers
-	memcpy(channel,&chip->tempch_regs,sizeof(chip->tempch_regs));
+	memcpy(&channel->regs,&chip->tempch_regs,sizeof(chip->tempch_regs));
 
 	//Look for the 16 special frequency codes
 	if(channel->regs.frequency >= 0xf0) {

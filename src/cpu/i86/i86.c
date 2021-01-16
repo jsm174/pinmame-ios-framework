@@ -32,10 +32,10 @@ static UINT8 i86_reg_layout[] =
 /* Layout of the debugger windows x,y,w,h */
 static UINT8 i86_win_layout[] =
 {
-	0, 0, 80, 3,					   /* register window (top rows) */
-	0, 4, 34, 18,					   /* disassembler window (left colums) */
-	35, 4, 45, 9,					   /* memory #1 window (right, upper middle) */
-	35, 13, 45, 8,					   /* memory #2 window (right, lower middle) */
+	0, 0, 80, 2,					   /* register window (top rows) */
+	0, 3, 34, 19,					   /* disassembler window (left colums) */
+	35, 3, 45, 9,					   /* memory #1 window (right, upper middle) */
+	35, 13, 45, 9,					   /* memory #2 window (right, lower middle) */
 	0, 23, 80, 1,					   /* command line window (bottom rows) */
 };
 
@@ -129,7 +129,7 @@ static void i86_state_register(void)
 void i86_init(void)
 {
 	unsigned int i, j, c;
-	BREGS reg_name[8] = {AL, CL, DL, BL, AH, CH, DH, BH};
+	static const BREGS reg_name[8] = {AL, CL, DL, BL, AH, CH, DH, BH};
 	for (i = 0; i < 256; i++)
 	{
 		for (j = i, c = 0; j > 0; j >>= 1)

@@ -590,6 +590,12 @@ public:
 	IUINT32 Raw2ARGB(IUINT32 color);
 	IUINT32 ARGB2Raw(IUINT32 argb);
 
+	static IUINT32 FloatToColor(float r, float g, float b, float a);
+	static void ColorToFloat(IUINT32 color, float *rgba);
+
+	void SetPixel(int x, int y, float r, float g, float b, float a);
+	void GetPixel(int x, int y, float *rgba);
+
 	// draw pixel batch
 	void SetPixels(const short *xylist, int count, IUINT32 color);
 
@@ -702,6 +708,8 @@ public:
 	// BicubicSampler, (x, y) is float point position
 	IUINT32 SampleBicubic(float x, float y, bool repeat = true) const;
 
+	// Bilinear Sampler, u and v is in the range of [0, 1]
+	IUINT32 Sample2D(float u, float v) const;
 
 	// resample 
 	enum ResampleFilter {

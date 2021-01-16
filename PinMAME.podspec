@@ -17,9 +17,9 @@ Pod::Spec.new do |s|
   }
 
   s.preserve_paths = '**'
-  s.source = { :git => 'file:////Users/jmillard/Desktop/pinmame-ios-framework_20200303' }
+  s.source = { :git => 'file:////Users/jmillard/swift/pinmame-ios-framework' }
   s.public_header_files = 'src/framework/pinmame_framework.h'
-  s.source_files    = 'src/artwork.c', 
+  s.source_files = 'src/artwork.c', 
                          'src/artwork.h', 
                          'src/audit.c', 
                          'src/audit.h', 
@@ -416,7 +416,7 @@ Pod::Spec.new do |s|
                          'src/wpc/sims/wpc/full/rs.c', 
                          'src/wpc/sims/wpc/full/hurr.c', 
                          'src/wpc/sims/wpc/full/gi.c', 
-                         'src/wpc/sims/wpc/prelim/dm.c', 
+                         'src/wpc/sims/wpc/full/dm.c', 
                          'src/wpc/sims/wpc/prelim/cp.c', 
                          'src/wpc/sims/wpc/prelim/ts.c', 
                          'src/wpc/sims/wpc/prelim/pop.c', 
@@ -476,8 +476,8 @@ Pod::Spec.new do |s|
                          'src/wpc/wico.c',
                          'src/wpc/wmssnd.c',
                          'src/wpc/wmssnd.h',
-                         'src/wpc/wpc.c',
                          'src/wpc/wpc.h',
+                         'src/wpc/wpc.c',
                          'src/wpc/wpcgames.c',
                          'src/wpc/wpcsam.c',
                          'src/wpc/wpcsam.h',
@@ -486,7 +486,9 @@ Pod::Spec.new do |s|
                          'src/wpc/zacgames.c',
                          'src/wpc/zacproto.c',
                          'src/wpc/zacsnd.c',
-                         'src/wpc/zacsnd.h'
+                         'src/wpc/zacsnd.h',
+                         'ext/vgm/vgmwrite.c',
+                         'ext/vgm/vgmwrite.h'
                           
   s.subspec 'framework' do |ss|
     ss.source_files = 'src/framework/fileio.c', 

@@ -72,7 +72,7 @@ static core_tLCDLayout dispSshtl[] = { \
   { 5,21,20,1, CORE_SEG7},  { 5,23,28,1,CORE_SEG7},{0}
 };
 INITGAMEFULL(sshtl, GEN_S9, dispSshtl, 0, FLIP_SWNO(0,41),
-             S11_BCDDIAG|S11_BCDDISP,0,3750,18867, 39, 40, 27, 26, 25, 0)
+             S11_BCDDIAG|S11_BCDDISP,0,3750,18867, 39, 40, 27, 26, 25, 0) //!! what was the 3750 used for?
 S9_ROMSTARTx4(sshtl,l7,"cpu_u20.128", CRC(848ad54c) SHA1(4e4ce5fb970da37706472f94a27fd912e1ecb1a0))
 S9S_SOUNDROM4111(      "cpu_u49.128", CRC(8050ae27) SHA1(e3f5e9398f61b075620ecd075617a8dac3c07d0e),
                        "spch_u4.732", CRC(b0d03c5e) SHA1(46b952f71a7ecc03e22e427875f6e16a9d124067),
@@ -243,6 +243,7 @@ CORE_CLONEDEF(rdkng,l3,l4,"Road Kings (L-3)", 1986, "Williams", s11_mS11XS,0)
 /*--------------------
 / Pin-Bot 10/86
 /--------------------*/
+// tournament MOD L-6 (or T-6?) exists (by Idleman??)
 INITGAMEFULL(pb, GEN_S11X, s11_dispS11, 14, FLIP_SWNO(10,11),
              0,0,0,0, 53, 0, 48, 54, 55,52)
 S11_ROMSTART48(pb,l5,"pbot_u26.l5", CRC(daa0c8e4) SHA1(47289b350eb0d84aa0d37e53383e18625451bbe8),
@@ -294,16 +295,26 @@ S11CS_SOUNDROM88(    "pbot_u4.l1",  CRC(de5926bd) SHA1(3d111e27c5f0c8c0afc5fe5cc
                      "pbot_u19.l1", CRC(40eb4e9f) SHA1(07b0557b35599a2dd5aa66a306fbbe8f50eed998))
 S11_ROMEND
 
+S11_ROMSTART48(pb,j1,"PEMBOT_u26.j1", CRC(25a7bb17) SHA1(2e075dfee9d747f66d7623d0cad9bff5581e6c78),
+                     "PEMBOT_u27.j1", CRC(e0657097) SHA1(1ff396ad630a0673669e578475525a77123ee970))
+S11XS_SOUNDROM88(    "pbot_u21.l1", CRC(3eab88d9) SHA1(667e3b675e2ae8fec6a6faddb9b0dd5531d64f8f),
+                     "pbot_u22.l1", CRC(a2d2c9cb) SHA1(46437dc54538f1626caf41a2818ddcf8000c44e4))
+S11CS_SOUNDROM88(    "pbot_u4.l1",  CRC(de5926bd) SHA1(3d111e27c5f0c8c0afc5fe5cc45bf77c12b69228),
+                     "pbot_u19.l1", CRC(40eb4e9f) SHA1(07b0557b35599a2dd5aa66a306fbbe8f50eed998))
+S11_ROMEND
+
 CORE_GAMEDEF(pb, l5, "Pin-Bot (L-5)", 1986, "Williams", s11_mS11XSL,0)
-CORE_CLONEDEF(pb,l5h,l5, "Pin-Bot (L-5, Free Play / Solar Value Mod)", 2012, "Francis", s11_mS11XSL,0)
+CORE_CLONEDEF(pb,l5h,l5,"Pin-Bot (L-5, Free Play / Solar Value Mod)", 2012, "Francis", s11_mS11XSL,0)
 CORE_CLONEDEF(pb,l3,l5, "Pin-Bot (L-3)", 1986, "Williams", s11_mS11XSL,0)
 CORE_CLONEDEF(pb,l2,l5, "Pin-Bot (L-2)", 1986, "Williams", s11_mS11XSL,0)
 CORE_CLONEDEF(pb,l1,l5, "Pin-Bot (L-1)", 1986, "Williams", s11_mS11XSL,0)
 CORE_CLONEDEF(pb,p4,l5, "Pin-Bot (P-4 Prototype)", 1986, "Williams", s11_mS11XSL,0)
+CORE_CLONEDEF(pb,j1,l5, "Pin-Bot (PEMBOT (no relation) J-1)", 2020, "A.M. Thurnherr", s11_mS11XSL,0)
 
 /*--------------------
 / F-14 Tomcat 5/87
 /--------------------*/
+// tournament MOD exists (allentownpinball)
 INITGAMEFULL(f14, GEN_S11A, s11_dispS11a, 14, FLIP_SWNO(63,15),
              0,0,0,0, 57, 58, 0, 28, 0, 0)
 S11_ROMSTART48(f14,p3,"f14_l3.u26", CRC(cd607556) SHA1(2ec95085784370a071cbf5df7ae5c6b4749605e2),
@@ -523,6 +534,7 @@ CORE_CLONEDEF(bnzai,pa,l3,"Banzai Run (P-A Prototype)", 1988, "Williams", s11_mS
 /*--------------------
 / Swords of Fury 8/88
 /--------------------*/
+// tournament MOD exists (allentownpinball)
 INITGAME(swrds, GEN_S11B, s11_dispS11b1,12, FLIP_SWNO(58,60),0,0)
 S11_ROMSTART48(swrds,l2,"swrd_u26.l2", CRC(c036f4ff) SHA1(a86840dbc117774aeca695ded1ab3ec76e134325),
                         "swrd_u27.l2", CRC(33b0fb5a) SHA1(a55bdfe20b1c869eae52d3be75df1c550d0b20f5))
@@ -806,6 +818,7 @@ CORE_CLONEDEF(bk2k,pf1,l4, "Black Knight 2000 (PF-1 Prototype French)", 1989, "W
 /*-----------------------
 / Police Force 9/89
 /-----------------------*/
+// tournament MOD exists (allentownpinball)
 static core_tLCDLayout dispPolic[] = {
   { 0,8,20, 8,CORE_SEG8H },
   { 2,0, 0,16,CORE_SEG16 },
@@ -868,6 +881,7 @@ CORE_GAMEDEF(tsptr,l3, "Transporter the Rescue (L-3)", 1989, "Bally", s11a_one,0
 /*-----------------------
 / Bad Cats 12/89
 /-----------------------*/
+// tournament MOD LT/6 exists (scochar,allentownpinball)
 INITGAME(bcats,GEN_S11B,s11_dispS11b2,12,FLIP_SWNO(58,57),S11_LOWALPHA|S11_DISPINV,S11_MUXSW2)
 S11_ROMSTART48(bcats,l5,"cats_u26.l5", CRC(32246d12) SHA1(b8aa89d197a6b992501904f5072a10ab1a31db87),
                         "cats_u27.l5", CRC(ef842bbf) SHA1(854860db428795d5de5c075aa78496f0c18a380f))
@@ -959,6 +973,7 @@ CORE_CLONEDEF(mousn,lu,l4,"Mousin' Around! (LU-1 Europe)", 1989, "Bally", s11a_o
 /*-----------------------
 / Whirlwind 4/90
 /-----------------------*/
+// tournament MOD exists (allentownpinball)
 INITGAME(whirl,GEN_S11B,s11_dispS11b2,12, FLIP_SWNO(58,57),S11_LOWALPHA|S11_DISPINV,S11_MUXSW2|S11_SNDOVERLAY)
 S11_ROMSTART48(whirl,l3,"whir_u26.l3", CRC(066b8fec) SHA1(017ca12ef5ebd9bb70690b0e096064be5144a512),
                         "whir_u27.l3", CRC(47fc033d) SHA1(42518650ecb538323bc33ee193bc229d89ca1936))

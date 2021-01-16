@@ -648,7 +648,7 @@ static WRITE_HANDLER(cslatch2_w) {
 
 const struct sndbrdIntf s11csIntf = {
   "WMSS11C", s11cs_init, NULL, NULL, s11cs_manCmd_w,
-  cslatch2_w, NULL,
+  cslatch2_w, soundlatch3_r,
   CAT3(pia_,S11CS_PIA0,_cb1_w), soundlatch3_r
 };
 
@@ -659,9 +659,6 @@ static MEMORY_READ_START(s11cs_readmem)
   { 0x8000, 0xffff, MRA_BANKNO(S11CS_BANK0) },
 MEMORY_END
 
-static WRITE_HANDLER(odd_w) {
-  logerror("Star Trax sound write: %02x:%02x\n", offset, data);
-}
 static MEMORY_WRITE_START(s11cs_writemem)
   { 0x0000, 0x1fff, MWA_RAM },
   { 0x2000, 0x2000, YM2151_register_port_0_w },     /* 2000-2ffe even */
@@ -670,7 +667,7 @@ static MEMORY_WRITE_START(s11cs_writemem)
   { 0x6000, 0x6000, hc55516_0_digit_clock_clear_w },/* 6000-67ff */
   { 0x6800, 0x6800, hc55516_0_clock_set_w },        /* 6800-6fff */
   { 0x7800, 0x7800, s11cs_rombank_w },              /* 7800-7fff */
-  { 0x9c00, 0x9cff, odd_w },
+  { 0x8000, 0xffff, MWA_NOP },
 MEMORY_END
 
 // Mixing volume levels for System 11. [mjr 8/2019]
@@ -742,7 +739,7 @@ static const struct pia6821_interface s11cs_pia = {
 };
 
 static WRITE_HANDLER(s11cs_rombank_w) {
-  cpu_setbank(S11CS_BANK0, s11clocals.brdData.romRegion + 0x10000*(data & 0x03) + 0x8000*((data & 0x04)>>2));
+  cpu_setbank(S11CS_BANK0, s11clocals.brdData.romRegion + 0x10000*((data & 0x03) + ((data & 0x08)>>1)) + 0x8000*((data & 0x04)>>2));
 }
 static void s11cs_init(struct sndbrdData *brdData) {
   s11clocals.brdData = *brdData;
@@ -1080,7 +1077,7 @@ static void wpcs_init(struct sndbrdData *brdData) {
 /---------------------*/
 /*-- ADSP core functions --*/
 static void adsp_init(data8_t *(*getBootROM)(int soft),
-               void (*txData)(UINT16 start, UINT16 size, UINT16 memStep, int sRate));
+               void (*txData)(UINT16 start, UINT16 size, UINT16 memStep, double sRate));
 static void adsp_boot(int soft);
 static void adsp_txCallback(int port, INT32 data);
 static WRITE16_HANDLER(adsp_control_w);
@@ -1107,7 +1104,7 @@ int WPC_gWPC95;
 static int dcs_custStart(const struct MachineSound *msound);
 static void dcs_custStop(void);
 static void dcs_dacUpdate(int num, INT16 *buffer, int length);
-static void dcs_txData(UINT16 start, UINT16 size, UINT16 memStep, int sRate);
+static void dcs_txData(UINT16 start, UINT16 size, UINT16 memStep, double sRate);
 
 /*-- external interface --*/
 static READ_HANDLER(dcs_data_r);
@@ -1498,17 +1495,18 @@ static void dcs_init(struct sndbrdData *brdData) {
 /------------------*/
 /*-- autobuffer SPORT transmission  --*/
 /*-- copy data to transmit into dac buffer --*/
-static void dcs_txData(UINT16 start, UINT16 size, UINT16 memStep, int sRate) {
-  UINT16 *mem = ((UINT16 *)(dcslocals.cpuRegion + ADSP2100_DATA_OFFSET)) + start;
+static void dcs_txData(UINT16 start, UINT16 size, UINT16 memStep, double sRate) {
+  const UINT16 * const mem = ((UINT16 *)(dcslocals.cpuRegion + ADSP2100_DATA_OFFSET)) + start;
   int idx;
 
   // Let the buffer fill naturally, so the throttling mechanism can work.
 //  stream_update(dcs_dac.stream, 0);
   if (size == 0) /* No data, stop playing */
-    { dcs_dac.status = 0; return; }
+  { dcs_dac.status = 0; return; }
+
   if (dcs_dac.status == 0)
   {
-	  // We have a hard assumption that the rate is always DCS_DEFALT_SAMPLE_RATE,
+	  // We have a hard assumption that the rate is always DCS_DEFAULT_SAMPLE_RATE,
 	  // because we have IIR filters constructed using that rate.  The filters
 	  // would need to be reconfigured here if the sample rate were actually
 	  // changing.  In practice it never does change, but we'll assert it just
@@ -1523,7 +1521,7 @@ static void dcs_txData(UINT16 start, UINT16 size, UINT16 memStep, int sRate) {
   // If we were not playing before, pre-load buffer with some silence to prevent jumpy starts.
   if (dcs_dac.status == 0)
   {
-      int idx_end = stream_get_sample_rate(dcs_dac.stream) * 20 / 1000 + 1;
+      const int idx_end = (int)(stream_get_sample_rate(dcs_dac.stream) * 20 / 1000 + 1 + 0.5);
       for (idx = 0; idx < idx_end; idx++) {
           dcs_dac.buffer[dcs_dac.sIn] = 0;
           dcs_dac.sIn = (dcs_dac.sIn + 1) & DCS_BUFFER_MASK;
@@ -1532,24 +1530,12 @@ static void dcs_txData(UINT16 start, UINT16 size, UINT16 memStep, int sRate) {
       dcs_dac.status = 1;
   }
   /*-- size is the size of the buffer not the number of samples --*/
-#if MAMEVER >= 3716
   for (idx = 0; idx < size; idx += memStep) {
     dcs_dac.buffer[dcs_dac.sIn] = mem[idx];
     dcs_dac.sIn = (dcs_dac.sIn + 1) & DCS_BUFFER_MASK;
   }
-#else /* MAMEVER */
-  size /= memStep;
-  sStep = sRate * 65536.0 / (double)(Machine->sample_rate);
-
-  /*-- copy samples into buffer --*/
-  while ((idx>>16) < size) {
-    dcs_dac.buffer[dcs_dac.sIn] = mem[(idx>>16)*memStep];
-    dcs_dac.sIn = (dcs_dac.sIn + 1) & DCS_BUFFER_MASK;
-    idx += sStep;
-  }
-#endif /* MAMEVER */
-
 }
+
 #define DCS_IRQSTEPS 4
 /*--------------------------------------------------*/
 /*-- This should actually be part of the CPU core --*/
@@ -1566,12 +1552,12 @@ static struct {
  UINT16  ctrlRegs[32];
  void   *irqTimer;
  data8_t *(*getBootROM)(int soft);
- void   (*txData)(UINT16 start, UINT16 size, UINT16 memStep, int sRate);
+ void   (*txData)(UINT16 start, UINT16 size, UINT16 memStep, double sRate);
 } adsp; /* = {{0},NULL,dcs_getBootROM,dcs_txData};*/
 static void adsp_irqGen(int dummy);
 
 static void adsp_init(data8_t *(*getBootROM)(int soft),
-                     void (*txData)(UINT16 start, UINT16 size, UINT16 memStep, int sRate)) {
+                     void (*txData)(UINT16 start, UINT16 size, UINT16 memStep, double sRate)) {
   /* stupid timer/machine init handling in MAME */
   if (adsp.irqTimer) timer_remove(adsp.irqTimer);
   /*-- reset control registers etc --*/
@@ -1636,7 +1622,7 @@ static WRITE16_HANDLER(adsp_control_w) {
 static struct {
   UINT16 start;
   UINT16 size, step;
-  int    sRate;
+  double sRate;
   int    iReg;
   int    last;
   int    irqCount;
@@ -1691,8 +1677,8 @@ static void adsp_txCallback(int port, INT32 data) {
     adsp_aBufData.size  = activecpu_get_reg(ADSP2100_L0 + ireg);
     /*-- assume that the first sample comes from the memory position before --*/
     adsp_aBufData.start = activecpu_get_reg(ADSP2100_I0 + ireg) - adsp_aBufData.step;
-    adsp_aBufData.sRate = (int)(Machine->drv->cpu[dcslocals.brdData.cpuNo].cpu_clock /
-                                (2 * (adsp.ctrlRegs[S1_SCLKDIV_REG] + 1)) / 16);
+    adsp_aBufData.sRate = Machine->drv->cpu[dcslocals.brdData.cpuNo].cpu_clock /
+                           (2 * (adsp.ctrlRegs[S1_SCLKDIV_REG] + 1)) / 16;
     adsp_aBufData.iReg = ireg;
     adsp_aBufData.irqCount = adsp_aBufData.last = 0;
     adsp_irqGen(0); /* first part, rest is handled via the timer */

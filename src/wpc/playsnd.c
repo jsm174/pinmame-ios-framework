@@ -7,7 +7,7 @@
 #include "cpu/z80/z80.h"
 #include "machine/z80fmly.h"
 #include "sound/tms5220.h"
-#include "sound/msm5205.h"
+//#include "sound/msm5205.h"
 
 /*----------------
 /  Local variables
@@ -41,12 +41,12 @@ static WRITE_HANDLER(play1s_data_w) {
   if (data & 0x0f) {
     if (oldData != data) sndlocals.volume = 100;
     oldData = data;
-    discrete_sound_w(8, data & 0x01);
-    discrete_sound_w(4, data & 0x02);
-    discrete_sound_w(2, data & 0x04);
-    discrete_sound_w(1, data & 0x08);
+    discrete_sound_w(1, data & 0x01);
+    discrete_sound_w(2, data & 0x02);
+    discrete_sound_w(4, data & 0x04);
+    discrete_sound_w(8, data & 0x08);
     if (~data & 0x10) { // start fading
-      timer_adjust(sndlocals.timer, 0.02, 0, 0.02);
+      timer_adjust(sndlocals.timer, 0.005, 0, 0.005);
       timer_on = 1;
     } else { // no fading used
       timer_adjust(sndlocals.timer, TIME_NEVER, 0, 0);
@@ -90,7 +90,7 @@ static void play2s_init(struct sndbrdData *brdData) {
 static WRITE_HANDLER(play2s_data_w) {
   sndlocals.freq = data;
   if (mixer_is_sample_playing(sndlocals.channel)) {
-    mixer_set_sample_frequency(sndlocals.channel, 2950000 / 4 / (sndlocals.freq + 1));
+    mixer_set_sample_frequency(sndlocals.channel, 2950000. / 4. / (sndlocals.freq + 1));
   }
 }
 
@@ -98,7 +98,7 @@ static WRITE_HANDLER(play2s_ctrl_w) {
   if (!sndlocals.enSn && (data & 1)) { // sound on to full volume
     timer_adjust(sndlocals.timer, TIME_NEVER, 0, 0);
     if (!mixer_is_sample_playing(sndlocals.channel)) {
-      mixer_play_sample(sndlocals.channel, (signed char *)squareWave, sizeof(squareWave), 2950000 / 4 / (sndlocals.freq + 1), 1);
+      mixer_play_sample(sndlocals.channel, (signed char *)squareWave, sizeof(squareWave), 2950000. / 4. / (sndlocals.freq + 1), 1);
     }
     sndlocals.volume = 100;
     mixer_set_volume(sndlocals.channel, sndlocals.volume);
@@ -314,7 +314,7 @@ static WRITE_HANDLER(ay8910_1_porta_w)	{
 }
 struct AY8910interface play4s_8910Int = {
 	2,			/* 2 chips */
-	(int)(3579545.0/2.),	/* 1.79 MHz */
+	3579545.0/2.,	/* 1.79 MHz */
 	{ MIXER(50,MIXER_PAN_LEFT), MIXER(50,MIXER_PAN_RIGHT) },	/* Volume */
 	{ 0, 0 },
 	{ 0, 0 },
@@ -469,7 +469,7 @@ const struct sndbrdIntf playzsIntf = {
 };
 
 MACHINE_DRIVER_START(PLAYMATICSZ)
-  MDRV_CPU_ADD_TAG("scpu", COP420, 2012160 / 16)
+  MDRV_CPU_ADD_TAG("scpu", COP420, 2012160./16.)
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(playsound_readmemz, playsound_writememz)
   MDRV_CPU_PORTS(playsound_readportz, playsound_writeportz)

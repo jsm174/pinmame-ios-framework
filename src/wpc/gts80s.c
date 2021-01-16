@@ -1,3 +1,5 @@
+// license:BSD-3-Clause
+
 #include "driver.h"
 #include "memory.h"
 #include "cpu/m6502/m6502.h"
@@ -44,6 +46,10 @@
     - System 3 sound boards
       2x6502, YM2151
 */
+
+#ifndef max
+#define max(x,y) ((x)>(y)?(x):(y))
+#endif
 
 #define DAC_SAMPLE_RATE (4*48000)
 
@@ -380,6 +386,10 @@ static WRITE_HANDLER(GTS80SS_da1_latch_w) {
 }
 
 /* From flipprojets.fr:
+	The speed variation exists on all MA-216 boards, but is
+	used on very few models, mainly for the TILT message (that speak decreasing
+	speed, and thus more and more deep).
+
 	The SC01-clock frequency is about 720 Khz at normal voice(when the 1408 receive
 	the value #7E at address $3000).The value #7E is about the middle of the
 	range and is used for all messages(except TILT).
@@ -397,8 +407,8 @@ static WRITE_HANDLER(GTS80SS_da1_latch_w) {
 static WRITE_HANDLER(GTS80SS_da2_latch_w) {
 //	logerror("da2_w: 0x%02x\n", data);
 	if (GTS80SS_locals.boardData.subType)
-		votraxsc01_set_base_frequency(11025+(data*100)); // OLD_VOTRAX
-		//votraxsc01_set_clock(data * 720000 / 0x7E); //!! correct like this? (see comment block above)
+		//votraxsc01_set_base_frequency(11025+(data*100)); // OLD_VOTRAX
+		votraxsc01_set_clock(max((int)-4500 + (int)data*(int)5750,1)); // approximation for the 2 data points above
 	GTS80SS_locals.device = 3;
 }
 
@@ -664,8 +674,8 @@ struct CustomSound_interface GTS80SS_customsoundinterface = { s80ss_sh_start, s8
 
 struct VOTRAXSC01interface GTS80SS_votrax_sc01_interface = {
 	1,						/* 1 chip */
-	{ 75 },					/* master volume */
-	{ 7000 },				/* initial sampling frequency */
+	{ 100 },				/* master volume */ // OLD_VOTRAX 75
+	{ 720000 },				/* initial sampling frequency */ //!! or ~895kHz? or MAME astrocde's 756000? // OLD_VOTRAX: 7000
 	{ &GTS80SS_nmi }		/* set NMI when busy signal get's low */
 };
 
@@ -1211,7 +1221,8 @@ static WRITE_HANDLER(sound_control_w)
 		logerror("Setting to rom #%d\n", GTS80BS_locals.rom_cs);
 
 		//D4 = 6295 - SS (Data = 1 = 7.575Khz; Data = 0 = 6.06 kHz (at 1MHz oscillation clock!)
-		OKIM6295_set_frequency(0,((GTS80BS_locals.u2_latch>>4)&1)? 7575.76 : 6060.61);
+		//OKIM6295_set_frequency(0,((GTS80BS_locals.u2_latch>>4)&1)? 7575.76 : 6060.61);
+		OKIM6295_set_pin7(0, 1000000., (GTS80BS_locals.u2_latch>>4)&1);
 
 		//D5 = LED (Active low?)
 		UpdateSoundLEDS(1,~(GTS80BS_locals.u2_latch>>5)&1);
@@ -1295,7 +1306,7 @@ static struct DACinterface GTS3_dacInt =
 
 static struct OKIM6295interface GTS3_okim6295_interface = {
 	1,						/* 1 chip */
-	{ 7575.76f },			/* base frequency */
+	{ 1000000./132. },		/* base frequency */
 	{ GTS3_MEMREG_SROM1 },	/* memory region */
 	{ 50 }
 };

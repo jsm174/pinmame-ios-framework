@@ -27,6 +27,7 @@
 #include "driver.h"
 #include "core.h"
 #include "sndbrd.h"
+#include "cpu/z80/z80.h"
 #include "machine/z80fmly.h"
 
 static struct {
@@ -82,17 +83,24 @@ static void init(void) {
   }
 }
 
+// TODO: for some odd reason, sometimes the ZTC irq state is all high bits, causes issues with next IRQ state
+void fix_irq_state(void) {
+  UINT8 irqstate = cpunum_get_reg(1, Z80_DC0);
+  if (irqstate == 0xff) {
+    cpunum_set_reg(1, Z80_DC0, 0);
+  }
+}
+
 void ctc_interrupt_0(int state) {
   init();
-// TODO: find out why sound stops altogether once a sample is played
-#ifdef MAME_DEBUG
-  cpu_set_irq_line_and_vector(1, 0, state, Z80_VECTOR(1, state));
-#endif
+  fix_irq_state();
+  cpu_set_irq_line_and_vector(1, 0, ASSERT_LINE, Z80_VECTOR(1, state));
 }
 
 void ctc_interrupt_1(int state) {
   init();
-  cpu_set_irq_line_and_vector(1, 0, state, Z80_VECTOR(0, state));
+  fix_irq_state();
+  cpu_set_irq_line_and_vector(1, 0, ASSERT_LINE, Z80_VECTOR(0, state));
 }
 
 static void shi(UINT8 data) {
@@ -111,7 +119,7 @@ static void clock_pulse(int dummy) {
   static UINT8 msmData;
   z80ctc_0_trg2_w(0, !(sndlocals.timerCnt % sndlocals.clockDiv)); // controls data fetch rate to MSM chip
   z80ctc_0_trg2_w(0, 0);
-  sndlocals.trg3 = sndlocals.timerCnt > 3;
+  sndlocals.trg3 = (sndlocals.timerCnt % 8) > 3;
   z80ctc_0_trg3_w(0, sndlocals.fifoSize || sndlocals.trg3);
   if (sndlocals.timerCnt == 4) msmData = sho();
   if (sndlocals.fifoSize && sndlocals.timerCnt == 64) {
@@ -119,12 +127,12 @@ static void clock_pulse(int dummy) {
     MSM5205_vclk_w(0, 1);
     MSM5205_vclk_w(0, 0);
   }
-  sndlocals.timerCnt++;
+  sndlocals.timerCnt = (sndlocals.timerCnt + 1) % 512;
 }
 
 static void zsu_init(struct sndbrdData *brdData) {
+  sndlocals.initDone = 0;
   init();
-  z80ctc_init(&ctc_intf);
   timer_pulse(TIME_IN_HZ(1000000),0,clock_pulse);
 }
 
@@ -142,7 +150,6 @@ static WRITE_HANDLER(ay8910_0_a_w) {
   static int bank;
   if ((data & 3) != bank) {
     bank = data & 3;
-    logerror("BANK: %x\n", bank);
     cpu_setbank(1, memory_region(REGION_USER1) + 0x8000 * bank);
   }
 }

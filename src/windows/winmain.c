@@ -205,14 +205,10 @@ int main(int argc, char **argv)
 	// have we decided on a game?
 	if (game_index != -1)
 	{
-		TIMECAPS caps;
-		MMRESULT result;
+		extern void set_lowest_possible_win_timer_resolution();
+		extern void restore_win_timer_resolution();
 
-		// crank up the multimedia timer resolution to its max
-		// this gives the system much finer timeslices
-		result = timeGetDevCaps(&caps, sizeof(caps));
-		if (result == TIMERR_NOERROR)
-			timeBeginPeriod(caps.wPeriodMin);
+		set_lowest_possible_win_timer_resolution();
 
 #if ENABLE_PROFILER
 		start_profiler();
@@ -225,9 +221,7 @@ int main(int argc, char **argv)
 		stop_profiler();
 #endif
 
-		// restore the timer resolution
-		if (result == TIMERR_NOERROR)
-			timeEndPeriod(caps.wPeriodMin);
+		restore_win_timer_resolution();
 	}
 
 	// restore the original LED state and close keyboard handle

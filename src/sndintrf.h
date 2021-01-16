@@ -435,6 +435,7 @@ struct CustomSound_interface
 	int (*sh_start)(const struct MachineSound *msound);
 	void (*sh_stop)(void);
 	void (*sh_update)(void);
+	void (*sh_reset)(void);
 };
 
 
@@ -449,7 +450,7 @@ const char *sound_name(const struct MachineSound *msound);
 /* returns number of chips, or 0 if the sound type doesn't support multiple instances */
 int sound_num(const struct MachineSound *msound);
 /* returns clock rate, or 0 if the sound type doesn't support a clock frequency */
-int sound_clock(const struct MachineSound *msound);
+double sound_clock(const struct MachineSound *msound);
 
 int sound_scalebufferpos(int value);
 

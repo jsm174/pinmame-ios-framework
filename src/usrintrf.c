@@ -2304,8 +2304,6 @@ int showcopyright(struct mame_bitmap *bitmap)
 	int done;
 #if defined(PINMAME) && defined(PROC_SUPPORT)
 	int displayed=0;
-	char top_text[17];
-	char bottom_text[17];
 #endif /* PINMAME && PROC_SUPPORT */
 	char buf[1000];
 	char buf2[256];
@@ -2321,9 +2319,7 @@ int showcopyright(struct mame_bitmap *bitmap)
 	done = 0;
 
 #if defined(PINMAME) && defined(PROC_SUPPORT)
-	sprintf(top_text," PRESS   LFT FLP");
-	sprintf(bottom_text,"                ");
-	procDisplayText(top_text, bottom_text);
+	procDisplayText(" PRESS   LFT FLP", "                ");
 #endif /* PINMAME && PROC_SUPPORT */
 
 	do
@@ -2345,9 +2341,7 @@ int showcopyright(struct mame_bitmap *bitmap)
 		    input_ui_pressed(IPT_UI_LEFT))
 #if defined(PINMAME) && defined(PROC_SUPPORT)
 			if (!displayed) {
-				sprintf(top_text, " PRESS   RGT FLP");
-				sprintf(bottom_text,"                ");
-				procDisplayText(top_text, bottom_text);
+				procDisplayText(" PRESS   RGT FLP", "                ");
 				displayed = 1;
 			}
 #endif /* PINMAME && PROC_SUPPORT */
@@ -2375,8 +2369,6 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 	int sel;
 #if defined(PINMAME) && defined(PROC_SUPPORT)
 	int displayed=0;
-	char top_text[17];
-	char bottom_text[17];
 #endif /* PINMAME && PROC_SUPPORT */
 
 
@@ -2429,13 +2421,11 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 		if (sound_clock(&Machine->drv->sound[i]))
 		{
 			if (sound_clock(&Machine->drv->sound[i]) >= 1000000)
-				sprintf(&buf[strlen(buf)]," %d.%06d MHz",
-						sound_clock(&Machine->drv->sound[i]) / 1000000,
-						sound_clock(&Machine->drv->sound[i]) % 1000000);
+				sprintf(&buf[strlen(buf)]," %3.06lf MHz",
+						sound_clock(&Machine->drv->sound[i]) / 1000000.);
 			else
-				sprintf(&buf[strlen(buf)]," %d.%03d kHz",
-						sound_clock(&Machine->drv->sound[i]) / 1000,
-						sound_clock(&Machine->drv->sound[i]) % 1000);
+				sprintf(&buf[strlen(buf)]," %3.03lf kHz",
+						sound_clock(&Machine->drv->sound[i]) / 1000.);
 		}
 
 		strcat(buf,"\n");
@@ -2494,10 +2484,7 @@ static int displaygameinfo(struct mame_bitmap *bitmap,int selected)
 #if defined(PINMAME) && defined(PROC_SUPPORT)
 		/* startup info, print MAME version and ask for any key */
 		if (!displayed) {
-                        sprintf(top_text," PRESS   ANY KEY ");
-			sprintf(bottom_text,"                ");
-			
-                        procDisplayText(top_text, bottom_text);
+			procDisplayText(" PRESS   ANY KEY ", "                ");
 			displayed=1;
 		}
 #endif /* PINMAME && PROC_SUPPORT */
@@ -3734,7 +3721,7 @@ static void onscrd_init(void)
 
 	item = 0;
 
-	if (Machine->sample_rate)
+	if (Machine->sample_rate != 0.)
 	{
 		onscrd_fnc[item] = onscrd_volume;
 		onscrd_arg[item] = 0;
@@ -3750,7 +3737,7 @@ static void onscrd_init(void)
 			}
 		}
 
-		/* K.Wilkins Feb2003 Additional of Disrete Sound System ADJUSTMENT sliders */
+		/* K.Wilkins Feb2003 Additional of Discrete Sound System ADJUSTMENT sliders */
 #if HAS_DISCRETE
 		/* See if there is a discrete sound sub-system present */
 		for (soundnum = 0; soundnum < MAX_SOUND; soundnum++)

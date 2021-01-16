@@ -39,7 +39,7 @@ int ADPCM_playing(int num);
 struct OKIM6295interface
 {
 	int num;                  		/* total number of chips */
-	float frequency[MAX_OKIM6295];	/* playback frequency */
+	double frequency[MAX_OKIM6295];	/* playback frequency */
 	int region[MAX_OKIM6295];		/* memory region where the sample ROM lives */
 	int mixing_level[MAX_OKIM6295];	/* master volume */
 };
@@ -48,7 +48,7 @@ int OKIM6295_sh_start(const struct MachineSound *msound);
 void OKIM6295_sh_stop(void);
 void OKIM6295_sh_update(void);
 void OKIM6295_set_bank_base(int which, int base);
-void OKIM6295_set_frequency(int which, double frequency);
+void OKIM6295_set_pin7(int which, double clock, unsigned char pin7);
 
 READ_HANDLER( OKIM6295_status_0_r );
 READ_HANDLER( OKIM6295_status_1_r );

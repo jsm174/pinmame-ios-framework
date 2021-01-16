@@ -92,10 +92,14 @@ static INTERRUPT_GEN(s7_vblank) {
     int ii;
     s7locals.solenoids |= CORE_SOLBIT(S7_GAMEONSOL);
     /*-- special solenoids updated based on switches --*/
+    /*-- but only when no LISY, otherwise special solenoids -- */
+    /*-- lock on when controlled by direct switches          -- */
+#ifndef LISY_SUPPORT
     for (ii = 0; ii < 8; ii++) {
       if (core_gameData->sxx.ssSw[ii] && core_getSw(core_gameData->sxx.ssSw[ii]))
         s7locals.solenoids |= CORE_SOLBIT(CORE_FIRSTSSSOL+ii);
     }
+#endif
   }
   s7locals.solsmooth[s7locals.vblankCount % S7_SOLSMOOTH] = s7locals.solenoids;
 #if S7_SOLSMOOTH != 2
@@ -295,11 +299,11 @@ static WRITE_HANDLER(pia4b_w) {
 }
 
 static READ_HANDLER(pia4a_r) {
-#ifndef LISY_SUPPORT
-  return core_getSwCol(s7locals.swCol);
-#else
-  return lisy_w_switch_handler(s7locals.swCol); //get the switches from LISY_W
+#if defined(LISY_SUPPORT)
+  //get the switches from LISY_mini
+  lisy_w_switch_handler();
 #endif
+  return core_getSwCol(s7locals.swCol);
 }
 
 /*---------------
@@ -372,10 +376,14 @@ static struct pia6821_interface s7_pia[] = {
 }};
 
 static SWITCH_UPDATE(s7) {
+
+#ifndef LISY_SUPPORT
+//if we have LISY, all switches come from LISY (Matrix[0] has e.g. ADVANCE Button!)
   if (inports) {
     coreGlobals.swMatrix[0] = (inports[S7_COMINPORT] & 0x7f00)>>8;
     coreGlobals.swMatrix[1] = inports[S7_COMINPORT];
   }
+#endif
 
   /*-- Generate interupts for diganostic keys --*/
   cpu_set_nmi_line(0,core_getSw(S7_SWCPUDIAG) ? ASSERT_LINE : CLEAR_LINE);
@@ -459,7 +467,7 @@ MEMORY_END
 MACHINE_DRIVER_START(s7)
   MDRV_IMPORT_FROM(PinMAME)
   MDRV_CORE_INIT_RESET_STOP(s7,s7,s7)
-  MDRV_CPU_ADD_TAG("mcpu", M6808, 3579545/4) // MAME: 3580000
+  MDRV_CPU_ADD_TAG("mcpu", M6808, 3579545./4.) // MAME: 3580000
   MDRV_CPU_MEMORY(s7_readmem, s7_writemem)
   MDRV_CPU_VBLANK_INT(s7_vblank, 1)
   MDRV_CPU_PERIODIC_INT(s7_irq, S7_IRQFREQ)

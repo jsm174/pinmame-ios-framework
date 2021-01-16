@@ -99,6 +99,7 @@ typedef struct {
 	int alpha_on_dmd;			/* Virtual alphanumeric displays on P-ROC DMD */
 	int virtual_dmd;			/* If we have no screen, then we can suppress the DMD */
 #endif /* PROC_SUPPORT */
+  int vgmwrite;
 } tPMoptions;
 extern tPMoptions pmoptions;
 struct pinMachine {
@@ -360,9 +361,9 @@ void machine_remove_sound(struct InternalMachineDriver *machine, const char *tag
 struct InternalMachineDriver
 {
         struct MachineCPU cpu[MAX_CPU];
-        float frames_per_second;
+        double frames_per_second;
         int vblank_duration;
-        UINT32 cpu_slices_per_frame;
+        double cpu_slices_per_frame;
 
         void (*machine_init)(void);
         void (*machine_stop)(void);

@@ -3,7 +3,7 @@
 ** All rights reserved.
 **
 ** This code is released under 2-clause BSD license. Please see the
-** file at : https://github.com/erikd/libsamplerate/blob/master/COPYING
+** file at : https://github.com/libsndfile/libsamplerate/blob/master/COPYING
 */
 
 #ifndef COMMON_H_INCLUDED
@@ -22,13 +22,27 @@ typedef	long	int32_t ;
 
 #define	SRC_MIN_RATIO_DIFF		(1e-20)
 
+#ifndef MAX
 #define	MAX(a,b)	(((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef MIN
 #define	MIN(a,b)	(((a) < (b)) ? (a) : (b))
+#endif
 
 #define	ARRAY_LEN(x)			((int) (sizeof (x) / sizeof ((x) [0])))
 #define OFFSETOF(type,member)	((int) (&((type*) 0)->member))
 
 #define	MAKE_MAGIC(a,b,c,d,e,f)	((a) + ((b) << 4) + ((c) << 8) + ((d) << 12) + ((e) << 16) + ((f) << 20))
+
+/*
+** Adds casting needed if compiled/included within cpp
+*/
+#ifdef __cplusplus
+#define ZERO_ALLOC(type, size)	static_cast<type*>(calloc(1, size))
+#else // __cplusplus
+#define ZERO_ALLOC(type, size)	calloc(1, size)
+#endif
 
 /*
 ** Inspiration : http://sourcefrog.net/weblog/software/languages/C/unused.html
@@ -53,13 +67,17 @@ typedef	long	int32_t ;
 enum
 {	SRC_FALSE	= 0,
 	SRC_TRUE	= 1,
-
-	SRC_MODE_PROCESS	= 555,
-	SRC_MODE_CALLBACK	= 556
 } ;
 
-enum
-{	SRC_ERR_NO_ERROR = 0,
+enum SRC_MODE
+{
+	SRC_MODE_PROCESS	= 0,
+	SRC_MODE_CALLBACK	= 1
+} ;
+
+enum SRC_ERR
+{
+	SRC_ERR_NO_ERROR = 0,
 
 	SRC_ERR_MALLOC_FAILED,
 	SRC_ERR_BAD_STATE,
@@ -91,51 +109,51 @@ enum
 typedef struct SRC_PRIVATE_tag
 {	double	last_ratio, last_position ;
 
-	int		error ;
+	enum SRC_ERR	error ;
 	int		channels ;
 
 	/* SRC_MODE_PROCESS or SRC_MODE_CALLBACK */
-	int		mode ;
-
-	/* Pointer to data to converter specific data. */
-	void	*private_data ;
+	enum SRC_MODE	mode ;
 
 	/* Varispeed process function. */
-	int		(*vari_process) (struct SRC_PRIVATE_tag *psrc, SRC_DATA *data) ;
+	enum SRC_ERR	(*vari_process) (struct SRC_PRIVATE_tag *psrc, SRC_DATA *data) ;
 
 	/* Constant speed process function. */
-	int		(*const_process) (struct SRC_PRIVATE_tag *psrc, SRC_DATA *data) ;
+	enum SRC_ERR	(*const_process) (struct SRC_PRIVATE_tag *psrc, SRC_DATA *data) ;
 
 	/* State reset. */
-	void	(*reset) (struct SRC_PRIVATE_tag *psrc) ;
+	void			(*reset) (struct SRC_PRIVATE_tag *psrc) ;
 
 	/* State clone. */
-	int		(*copy) (struct SRC_PRIVATE_tag *from, struct SRC_PRIVATE_tag *to) ;
+	enum SRC_ERR	(*copy) (struct SRC_PRIVATE_tag *from, struct SRC_PRIVATE_tag *to) ;
 
 	/* Data specific to SRC_MODE_CALLBACK. */
 	src_callback_t	callback_func ;
 	void			*user_callback_data ;
 	long			saved_frames ;
 	const float		*saved_data ;
+
+	/* Pointer to data to converter specific data. */
+	void			*private_data ;
 } SRC_PRIVATE ;
 
 /* In src_sinc.c */
 const char* sinc_get_name (int src_enum) ;
 const char* sinc_get_description (int src_enum) ;
 
-int sinc_set_converter (SRC_PRIVATE *psrc, int src_enum) ;
+enum SRC_ERR sinc_set_converter (SRC_PRIVATE *psrc, int src_enum) ;
 
 /* In src_linear.c */
 const char* linear_get_name (int src_enum) ;
 const char* linear_get_description (int src_enum) ;
 
-int linear_set_converter (SRC_PRIVATE *psrc, int src_enum) ;
+enum SRC_ERR linear_set_converter (SRC_PRIVATE *psrc, int src_enum) ;
 
 /* In src_zoh.c */
 const char* zoh_get_name (int src_enum) ;
 const char* zoh_get_description (int src_enum) ;
 
-int zoh_set_converter (SRC_PRIVATE *psrc, int src_enum) ;
+enum SRC_ERR zoh_set_converter (SRC_PRIVATE *psrc, int src_enum) ;
 
 /*----------------------------------------------------------
 **	Common static inline functions.

@@ -4317,7 +4317,7 @@
 								>
 							</File>
 							<File
-								RelativePath=".\src\wpc\sims\wpc\prelim\dm.c"
+								RelativePath=".\src\wpc\sims\wpc\full\dm.c"
 								>
 							</File>
 							<File
@@ -4628,6 +4628,18 @@
 					</File>
 					<File
 						RelativePath=".\ext\zlib\include\zlib.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="vgm"
+					>
+					<File
+						RelativePath=".\ext\vgm\vgmwrite.c"
+						>
+					</File>
+					<File
+						RelativePath=".\ext\vgm\vgmwrite.h"
 						>
 					</File>
 				</Filter>

@@ -2085,7 +2085,7 @@ SOURCE=.\src\wpc\sims\wpc\prelim\dh.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\wpc\sims\wpc\prelim\dm.c
+SOURCE=.\src\wpc\sims\wpc\full\dm.c
 # End Source File
 # Begin Source File
 
@@ -3028,6 +3028,20 @@ SOURCE=.\src\ui\win32ui.h
 # End Source File
 # End Group
 # Begin Group "external"
+
+# PROP Default_Filter ""
+# Begin Group "vgm"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\ext\vgm\vgmwrite.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\vgm\vgmwrite.c
+# End Source File
+# End Group
 
 # PROP Default_Filter ""
 # Begin Group "zlib"

@@ -50,7 +50,7 @@ static struct {
   int isHH;
 } locals;
 
-#define LTD_CPUFREQ	3579545/4
+#define LTD_CPUFREQ	3579545./4.
 
 static WRITE_HANDLER(ay8910_0_ctrl_w) { AY8910_set_volume(0, ALL_8910_CHANNELS, 50); AY8910Write(0,0,data); }
 static WRITE_HANDLER(ay8910_0_data_w) { AY8910_set_volume(0, ALL_8910_CHANNELS, 50); AY8910Write(0,1,data); }
@@ -89,9 +89,17 @@ static INTERRUPT_GEN(LTD_vblank) {
   }
   /*-- solenoids --*/
   if ((locals.vblankCount % LTD_SOLSMOOTH) == 0) {
-    coreGlobals.solenoids = locals.solenoids;
     locals.solenoids &= 0x10000;
   }
+  if (!strncasecmp(Machine->gamedrv->name, "force", 5) && (locals.vblankCount % 2) == 0) {
+    locals.solenoids &= 0xff100ff;
+    coreGlobals.tmpLampMatrix[6] = 0;
+  }
+  if (!strncasecmp(Machine->gamedrv->name, "spcpoker", 8) && (locals.vblankCount % 2) == 0) {
+    locals.solenoids &= 0x1ffff;
+    coreGlobals.tmpLampMatrix[5] = 0;
+  }
+  coreGlobals.solenoids = locals.solenoids;
   /*-- display --*/
   if ((locals.vblankCount % LTD_DISPLAYSMOOTH) == 0)
   {
@@ -147,6 +155,11 @@ static WRITE_HANDLER(peri_w) {
         if (data & 0x08) lampStrobe = 0;
         else if (data & 0x80) lampStrobe = 1;
         coreGlobals.tmpLampMatrix[5] = data & 0x77;
+        if (data & 0x77) {
+          locals.solenoids = (locals.solenoids & 0x1ffff) | ((data & 0x77) << 17);
+          coreGlobals.solenoids = locals.solenoids;
+          locals.vblankCount = 0;
+        }
       } else {
         coreGlobals.tmpLampMatrix[offset + 12 * lampStrobe] = data;
       }
@@ -155,14 +168,18 @@ static WRITE_HANDLER(peri_w) {
     }
     // map flippers enable to sol 17
     if (!offset) {
-      locals.solenoids = (locals.solenoids & 0x0ffff) | ((data & 0x40) || (~data & 0x10) ? 0 : 0x10000);
+      locals.solenoids = (locals.solenoids & 0xfeffff) | ((data & 0x40) || (~data & 0x10) ? 0 : 0x10000);
       locals.diagnosticLed = data >> 7;
     }
   } else if (offset == 0x06) { // either lamps or solenoids, or a mix of both!
     coreGlobals.tmpLampMatrix[6] = data;
-    locals.solenoids = (locals.solenoids & 0x100ff) | (data << 8);
+    locals.solenoids = (locals.solenoids & 0xff00ff) | (data << 8);
+    coreGlobals.solenoids = locals.solenoids;
+    locals.vblankCount = 0;
   } else if (offset == 0x07) {
-    locals.solenoids = (locals.solenoids & 0x1ff00) | data;
+    locals.solenoids = (locals.solenoids & 0xffff00) | data;
+    coreGlobals.solenoids = locals.solenoids;
+    locals.vblankCount = 0;
   } else if (offset == 0x08) {
     seg = 9 - (strobe & 0x0f);
     locals.segments[seg].w = core_bcd2seg7a[data >> 4];
@@ -188,6 +205,8 @@ static WRITE_HANDLER(peri_w) {
     }
   } else if (offset == 0x0d && !strncasecmp(Machine->gamedrv->name, "force", 5)) { // drop target single reset solenoids
     locals.solenoids = (locals.solenoids & 0x1ffff) | (0x10000 << data);
+    coreGlobals.solenoids = locals.solenoids;
+    locals.vblankCount = 0;
   } else if (offset == 0x0f) {
     logerror("CLR\n");
   } else {

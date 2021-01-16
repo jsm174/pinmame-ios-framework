@@ -8,7 +8,7 @@
 #include "math.h"
 
 #define MASTER_CLOCK 10000000
-#define S14001_CLOCK (MASTER_CLOCK / 4)
+#define S14001_CLOCK (MASTER_CLOCK / 4.)
 
 /*----------------------------------------
 / Stern Sound System
@@ -162,9 +162,9 @@ static int st100b_sh_start(const struct MachineSound *msound) {
 	mixer_play_sample_16(st100loc.channel+3,s100Waveb1, sizeof(s100Waveb1), ST100B_FREQ4*(sizeof(s100Waveb1)/2), 1);
 
 	st100loc.freqb5 = 0;
-	mixer_play_sample_16(st100loc.channel+4,s100Waveb5, sizeof(s100Waveb5), (freqarb5[st100loc.freqb5])*sizeof(s100Waveb5), 1);
+	mixer_play_sample_16(st100loc.channel+4,s100Waveb5, sizeof(s100Waveb5), freqarb5[st100loc.freqb5]*sizeof(s100Waveb5), 1);
 	st100loc.freqb6 = 0;
-	mixer_play_sample_16(st100loc.channel+5,s100Waveb6, sizeof(s100Waveb6), (freqarb6[st100loc.freqb6])*sizeof(s100Waveb6), 1);
+	mixer_play_sample_16(st100loc.channel+5,s100Waveb6, sizeof(s100Waveb6), freqarb6[st100loc.freqb6]*sizeof(s100Waveb6), 1);
 	timer_pulse(TIME_IN_SEC(0.02),0,changefr);
 
 	return 0;
@@ -211,9 +211,9 @@ static int st100_sh_start(const struct MachineSound *msound) {
 	mixer_play_sample_16(st100loc.channel+ 3,s100Waveb1, sizeof(s100Waveb1), ST100_FREQ4*(sizeof(s100Waveb1)/2), 1);
 
 	st100loc.freqb5 = 0;
-	mixer_play_sample_16(st100loc.channel+ 4,s100Waveb5, sizeof(s100Waveb5), (freqarb5[st100loc.freqb5])*sizeof(s100Waveb5), 1);
+	mixer_play_sample_16(st100loc.channel+ 4,s100Waveb5, sizeof(s100Waveb5), freqarb5[st100loc.freqb5]*sizeof(s100Waveb5), 1);
 	st100loc.freqb6 = 0;
-	mixer_play_sample_16(st100loc.channel+ 5,s100Waveb6, sizeof(s100Waveb6), (freqarb6[st100loc.freqb6])*sizeof(s100Waveb6), 1);
+	mixer_play_sample_16(st100loc.channel+ 5,s100Waveb6, sizeof(s100Waveb6), freqarb6[st100loc.freqb6]*sizeof(s100Waveb6), 1);
 	timer_pulse(TIME_IN_SEC(0.02),0,changefr);
 
 	mixer_play_sample_16(st100loc.channel+ 6,s100Waveb1, sizeof(s100Waveb1), ST100_FREQ1*(sizeof(s100Waveb1)/2), 1);	// Electronic chimes base frequency
@@ -374,7 +374,7 @@ static INT16 sineWaveext[16][32000]; // wave triggered by external clock, very r
 
 
 static int setvol(int param) {
-	if ((st300loc.volnr) == 0) return 0;
+	if (st300loc.volnr == 0) return 0;
 	if (st300loc.dir) { // count up
 //		logerror("volume up %04d ind %04d \n",volume300[st300loc.volnr],st300loc.volnr );
 		return volume300[st300loc.volnr];
@@ -409,10 +409,10 @@ static void playsam3(int param) {
 	if ((st300loc.cr3 & 0x80) && (st300loc.timlat3 > 0) && (st300loc.reset == 0)) {		// output is enabled...
 		startvol(0);
 		if (setvol(0) == 0) {
-			logerror("playsam Q2/Q3noise volume off \n");
+			logerror("playsam Q2/Q3 noise volume off\n");
 		}
 		if (setvol(0) == 100) {
-			logerror("playsam Q2/Q3noise volume maximum\n");
+			logerror("playsam Q2/Q3 noise volume maximum\n");
 		}
 
 		mixer_set_volume(st300loc.channel,setvol(0)*ST300_VOL);
@@ -420,10 +420,10 @@ static void playsam3(int param) {
 	} else {	// q3 is not running... //!! exact same code!
 		startvol(0);
 		if (setvol(0) == 0) {
-			logerror("playsam Q2/EXT noise volume off \n");
+			logerror("playsam Q2/EXT noise volume off\n");
 		}
 		if (setvol(0) == 100) {
-			logerror("playsam q2/EXT noise volume maximum\n");
+			logerror("playsam Q2/EXT noise volume maximum\n");
 		}
 
 		mixer_set_volume(st300loc.channel,setvol(0)*ST300_VOL);
@@ -461,7 +461,7 @@ static void playsamext(int param){
 	if (st300loc.noise) {	// output is enabled...
 		//mixer_play_sample_16(st300loc.channel+2,sineWaveext, sizeof(sineWaveext), f , 1);
 		//logerror("*** playsam EXT noise frequence %08d data %04d ***\n",f,st300loc.extfreq);
-		mixer_play_sample_16(st300loc.channel + 2, sineWaveext[st300loc.extfreq-1], sizeof(sineWaveext[st300loc.extfreq-1]), 48000, 1);
+		mixer_play_sample_16(st300loc.channel+2, sineWaveext[st300loc.extfreq-1], sizeof(sineWaveext[st300loc.extfreq-1]), 48000, 1);
 		logerror("*** playsam EXT noise data %04d ***\n", st300loc.extfreq);
 	} else {
 		mixer_stop_sample(st300loc.channel+2);
@@ -583,19 +583,23 @@ static int st300_sh_start(const struct MachineSound *msound) {
 		snddatst300.c0 = 0;
 	}
 
-	// very very rough approximation sample table for what the real noise generator is doing:
+	// very very rough approximation sample table for what the real noise generator is doing (not that important though, noise is very very rarely triggered on the tables):
 	// original noise sample table in [0]
 	for (i = 0;i < 32000;++i) {
 		//s = (s ? 0 : 1);
 		//if (s) {
-			sineWaveext[0][i] = (INT16)white_noise((float)(32767*0.85)); //rand()*2-32767;
+			float s = white_noise(0.85f)+brown_noise(0.15f);
+			if (s <= -1.0f)
+				s = -32767.f;
+			else if (s >= 1.0f)
+				s = 32767.f;
+			else
+				s *= 32767.f;
+			sineWaveext[0][i] = (INT16)s; //rand()*2-32767;
 		//} else {
 		//	sineWaveext[i] = 0-rand();
 		//}
 	}
-	// add some brown noise to the white noise
-	for (i = 0;i < 32000;++i)
-		sineWaveext[0][i] += (INT16)brown_noise((float)(32767*0.15));
 
 	// box filtered noise sample tables in [1]..[15]
 	for (j = 1; j < 16; ++j) {
@@ -605,7 +609,7 @@ static int st300_sh_start(const struct MachineSound *msound) {
 			for (k = -j*2; k <= j*2; ++k) // magic, filter down to something that loosely matches the original
 			{
 				int ofs;
-				if ((i + k) < 0)
+				if ((i+k) < 0)
 					ofs = 32000+(i+k);
 				else if ((i+k) >= 32000)
 					ofs = (i+k)-32000;
@@ -665,16 +669,16 @@ static WRITE_HANDLER(st300_ctrl_w) {
 		playsamext(0);
 		playsam3(0);
 	} else {
-		logerror("st300_CTRL_W xxxx data %02x  \n", data);
+		logerror("st300_CTRL_W xxxx data %02x \n", data);
 		if (data & 0x80) {	// VSU-1000 control write
-			int clock_divisor = 16 - (data & 0x07);
-			logerror("st300_CTRL_W Voicespeed data %02x speed %02x vol %02x  \n", data, data & 0x07, ((data >> 3) & 0xf));
+			const int clock_divisor = 16 - (data & 0x07);
+			logerror("st300_CTRL_W Voicespeed data %02x speed %02x vol %02x \n", data, /*data & 0x07*/S14001_CLOCK / clock_divisor / 8, ((data >> 3) & 0xf));
 			/* volume and frequency control goes here */
-			S14001A_set_volume(15-((data >> 3) & 0xf));
-			//m_s14001a->set_output_gain(0, ((data >> 3 & 0xf) + 1) / 16.0); //!! from MAME
+			mixer_set_volume(9, (int)((15-((data >> 3) & 0xf)) / 15.0 * 100.0)); // PinMAME
+			//mixer_set_volume(9, (int)(((data >> 3 & 0xf) + 1) / 16.0 * 100.0)); //!! MAME
 			/* clock control - the first LS161 divides the clock by 9 to 16, the 2nd by 8,
 			   giving a final clock from 19.5kHz to 34.7kHz */
-			S14001A_set_rate(/*data & 0x07*/S14001_CLOCK / clock_divisor / 8);
+			S14001A_set_rate(/*data & 0x07*/S14001_CLOCK / clock_divisor / 8.);
 		}
 		else if (data & 0x40)
 		{
@@ -697,7 +701,7 @@ static WRITE_HANDLER(st300_data_w) {
 		snddatst300.timer1 = st300loc.timlat1;
 		w1 = ST300_INTCLOCK / (2 * (snddatst300.timer1 + 1));
 		st300loc.tfre1 = w1;
-//		logerror("%04x: st300_data_w timlat1 loaded %04x  \n", activecpu_get_previouspc(), st300loc.timlat1);
+//		logerror("%04x: st300_data_w timlat1 loaded %04x \n", activecpu_get_previouspc(), st300loc.timlat1);
 		if (st300loc.timlat1 == 0) {
 			mixer_stop_sample(st300loc.channel+1);
 			logerror ("Playsam Q1 off\n");
@@ -707,13 +711,13 @@ static WRITE_HANDLER(st300_data_w) {
 		st300loc.timlat2 = snddatst300.ax[data] + snddatst300.ax[(data-1)] * 256;
 		snddatst300.timer2 = st300loc.timlat2;
 		st300loc.tfre2 = ST300_INTCLOCK / (2 * (snddatst300.timer2 + 1));
-//		logerror("%04x: st300_data_w timlat2 loaded %04x freq %04d  \n", activecpu_get_previouspc(), st300loc.timlat2,st300loc.tfre2);
+//		logerror("%04x: st300_data_w timlat2 loaded %04x freq %04d \n", activecpu_get_previouspc(), st300loc.timlat2,st300loc.tfre2);
 	}
 	if (data == 7) {
 		st300loc.timlat3 = snddatst300.ax[data] + snddatst300.ax[(data-1)] * 256;
 		snddatst300.timer3 = st300loc.timlat3;
 		st300loc.tfre3 = (ST300_INTCLOCK / (2 * (snddatst300.timer3 + 1)));
-		logerror("%04x: st300_data_w timlat3 loaded %04x freq %04d  \n", activecpu_get_previouspc(), st300loc.timlat3,st300loc.tfre3);
+		logerror("%04x: st300_data_w timlat3 loaded %04x freq %04d \n", activecpu_get_previouspc(), st300loc.timlat3,st300loc.tfre3);
 	}
 	if (data == 1) {
 		st300loc.cr2= snddatst300.ax[data];

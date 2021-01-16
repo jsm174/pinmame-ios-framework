@@ -641,6 +641,7 @@ CORE_CLONEDEFNV(futurspb,futurspa,"Future Spa (7-digit conversion)",2004,"Bally 
 /*--------------------------------
 / Space Invaders
 /-------------------------------*/
+// tournament MOD exists (allentownpinball)
 INITGAME(spaceinv,GEN_BY35,dispBy6,FLIP_SW(FLIP_L),8,SNDBRD_BY51,0)
 BY35_ROMSTART888(spaceinv,"792-10_1.716",CRC(075eba5a) SHA1(7147c2dfb6af1c39bbfb9e98f409baae10d09628),
                           "792-13_2.716",CRC(b87b9e6b) SHA1(eab787ea81409ba88e30a342564944e1fade8124),
@@ -661,6 +662,7 @@ CORE_CLONEDEFNV(spaceinb,spaceinv,"Space Invaders (7-digit conversion)",2004,"Ba
 /*--------------------------------
 / Nitro Groundshaker
 /-------------------------------*/
+// tournament/multiball MOD exists (allentownpinball)
 INITGAME(ngndshkr,GEN_BY35,dispBy6,FLIP_SW(FLIP_L),0,SNDBRD_BY51,0)
 BY35_ROMSTART888(ngndshkr,"776-17_1.716",CRC(f2d44235) SHA1(282106767b5ec5180fa8e7eb2eb5b4766849c920),
                           "776-11_2.716",CRC(b0396b55) SHA1(2d10c4af7ecfa23b64ffb640111b582f44256fd5),
@@ -678,9 +680,18 @@ BY35_ROMEND
 #define input_ports_ngndshkb input_ports_ngndshkr
 CORE_CLONEDEFNV(ngndshkb,ngndshkr,"Nitro Groundshaker (7-digit conversion)",2004,"Bally / Oliver",by35_mBY35_51S,0) // rev. 90
 
+INITGAME(ngndshkm,GEN_BY35,dispBy7,FLIP_SW(FLIP_L),0,SNDBRD_BY51,0)
+BY35_ROMSTARTx00(ngndshkm,"nitr2732s.u2",CRC(e034598c) SHA1(27e2f7db52e4d90028a83da75e51afef82eb8292),
+                          "720-3532.u6b",CRC(b5e6a3d5) SHA1(fa1593eeed449dbac87965e613b501108a015eb2))
+BY51_SOUNDROM8(           "776-15_4.716",CRC(63c80c52) SHA1(3350919fce237b308b8f960948f70d01d312e9c0))
+BY35_ROMEND
+#define input_ports_ngndshkm input_ports_ngndshkr
+CORE_CLONEDEFNV(ngndshkm,ngndshkr,"Nitro Groundshaker (7-digit conversion with siren patch)",2019,"Bally / Oliver / Martin",by35_mBY35_51S,0) // rev. 90
+
 /*--------------------------------
 / Silverball Mania
 /-------------------------------*/
+// tournament MOD exists (allentownpinball)
 INITGAME(slbmania,GEN_BY35,dispBy6,FLIP_SW(FLIP_L),0,SNDBRD_BY51,0)
 BY35_ROMSTART888(slbmania,"786-16_1.716",CRC(c054733f) SHA1(2699cf940ce40012e2d7554b0b130adcb2bec6d1),
                           "786-17_2.716",CRC(94af0298) SHA1(579eb0290283194d92b172f787d8a9ff54f16a07),
@@ -1005,8 +1016,8 @@ CORE_GAMEDEFNV(flashgdn,"Flash Gordon",1981,"Bally",by35_mBY35_61S,0)
 #define init_flashgda        init_flashgdn
 BY35_ROMSTARTx00(flashgda,"834-23_2.732",CRC(0c7a0d91) SHA1(1f79be15817975acbc35cb08591e2289e2eca938),
                           "7526fn.u6",CRC(00258a56) SHA1(40143d65ee92d20a565d21b6c1c3507d659a38e0))
-BY61_SOUNDROM0xx0(        "834-35_2.532",CRC(dff3f711) SHA1(254a5670775ecb6c347f33af8ba7c350e4cfa550),
-                          "834-36_5.532",CRC(18691897) SHA1(3b445e0756c07d80f14c01af5a7f87744474ae15))
+BY61_SOUNDROM0xx0(        "834-20_2.532",CRC(2f8ced3e) SHA1(ecdeb07c31c22ec313b55774f4358a9923c5e9e7),
+                          "834-18_5.532",CRC(8799e80e) SHA1(f255b4e7964967c82cfc2de20ebe4b8d501e3cb0))
 BY35_ROMEND
 CORE_CLONEDEFNV(flashgda,flashgdn,"Flash Gordon (Free Play)",2004,"Bally / Oliver",by35_mBY35_61S,0) // rev. 1
 
@@ -1533,7 +1544,7 @@ BY35_ROMEND
 CORE_CLONEDEFNV(bmxa,bmx,"BMX (Free Play)",2004,"Bally / Oliver",by35_mBY35_51S,0) // rev. 1
 
 /*-----------------------------------------------------------
-/ Grand Slam (BY35-???: 01/83) - Uses AS2888-51 Sound Board
+/ Grand Slam (BY35-???: 01/83) - Uses AS2518-51 Sound Board     //!! why was this previously thought to be a AS2888-51 ?
 /-----------------------------------------------------------*/
 static core_tLCDLayout granslamDisp[] = {
   DISP_SEG_IMPORT(dispBy6),
@@ -1767,7 +1778,7 @@ static struct DACinterface grand_dacInt = { 1, { 50 }};
 MACHINE_DRIVER_START(by35_GP)
   MDRV_IMPORT_FROM(by35)
   MDRV_DIPS(33)
-  MDRV_CPU_ADD_TAG("scpu", M6802, 3579545/4)
+  MDRV_CPU_ADD_TAG("scpu", M6802, 3579545./4.)
   MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
   MDRV_CPU_MEMORY(gpsnd_readmem, gpsnd_writemem)
   MDRV_SOUND_ADD(DAC, grand_dacInt)
@@ -1838,3 +1849,16 @@ ROM_START(bullseyn) \
 BY35_ROMEND
 #define input_ports_bullseyn input_ports_bullseye
 CORE_CLONEDEFNV(bullseyn, bullseye,"301/Bullseye (normal pinball scoring)",1986,"Grand Products Inc.",by35_GP,0)
+
+/*--------------------------------
+/ Scott's Test ROM
+/-------------------------------*/
+INITGAME(scotest8,GEN_BY17,dispBy7,FLIP_SW(FLIP_L),8,SNDBRD_BY50,0)
+ROM_START(scotest8)
+  NORMALREGION(0x10000, BY35_CPUREGION)
+    ROM_LOAD("scotest8.732", 0x1000, 0x1000, CRC(199e5d54) SHA1(ff947c232c060ffb796e39da06fc7559a78e04f8))
+    ROM_RELOAD(0xf000, 0x1000)
+  BY50_SOUNDROM("729-18_3.123",CRC(7b6b7d45) SHA1(22f791bac0baab71754b2f6c00c217a342c92df5))
+BY35_ROMEND
+#define input_ports_scotest8 input_ports_by35
+CORE_GAMEDEFNV(scotest8,"Scott's Test ROM (version 8)",2019,"Scott Charles",by35_mBY35_50S,0)

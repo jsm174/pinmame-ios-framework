@@ -326,18 +326,7 @@ CFLAGS =
 CPPFLAGS =
 
 CFLAGS += -std=gnu99
-# gnu++98 is supported since 3.4.0
-#  check for >= 4
-ifeq ($(CPP_MAJOR),$(call gte,$(call encode,$(CPP_MAJOR)),$(call encode,4)))
- CPPFLAGS += -std=gnu++98
-else
-#  check for >= 3.4
- ifeq ($(CPP_MAJOR),$(call eq,$(call encode,$(CPP_MAJOR)),$(call encode,3)))
-  ifeq ($(CPP_MINOR),$(call gte,$(call encode,$(CPP_MINOR)),$(call encode,4)))
-   CPPFLAGS += -std=gnu++98
-  endif
- endif
-endif
+CPPFLAGS += -std=gnu++11
 
 # add -g if we need symbols, and ensure we have frame pointers
 # [PinMAME] not omiting frame pointers is very helpful for stack traces, and there's hardly a performance gain if you do omit
@@ -436,6 +425,9 @@ CPPFLAGS += \
 LDFLAGS =
 MAPFLAGS =
 
+# Allow duplicate symbol definitions (e.g., non-extern entry in a header file)
+LDFLAGS += -Wl,--allow-multiple-definition
+
 # strip symbols and other metadata in non-symbols builds
 ifndef SYMBOLS
 LDFLAGS += -s
@@ -505,6 +497,11 @@ include src/$(TARGET).mak
 include src/rules.mak
 include src/$(MAMEOS)/$(MAMEOS).mak
 ifdef PROC
+# add include directories for libpinproc and yaml-cpp
+CFLAGS += -Iext/pinproc/include -Iext/yaml-cpp/include
+CPPFLAGS += -Iext/pinproc/include -Iext/yaml-cpp/include
+# add library directories
+LDFLAGS += -Lext/pinproc/lib -Lext/yaml-cpp/lib
 include src/p-roc/p-roc.mak
 endif
 

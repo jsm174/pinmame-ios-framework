@@ -3,7 +3,7 @@
 ** All rights reserved.
 **
 ** This code is released under 2-clause BSD license. Please see the
-** file at : https://github.com/erikd/libsamplerate/blob/master/COPYING
+** file at : https://github.com/libsndfile/libsamplerate/blob/master/COPYING
 */
 
 #include	<stdio.h>
@@ -120,9 +120,9 @@ src_delete (SRC_STATE *state)
 	if (psrc)
 	{	if (psrc->private_data)
 			free (psrc->private_data) ;
-		memset (psrc, 0, sizeof (SRC_PRIVATE)) ;
+		//memset (psrc, 0, sizeof (SRC_PRIVATE)) ;
 		free (psrc) ;
-		} ;
+	} ;
 
 	return NULL ;
 } /* src_state */
@@ -279,7 +279,7 @@ src_callback_read (SRC_STATE *state, double src_ratio, long frames, float *data)
 	psrc->saved_frames = src_data.input_frames ;
 
 	if (error != 0)
-	{	psrc->error = error ;
+	{	psrc->error = (enum SRC_ERR) error ;
 		return 0 ;
 		} ;
 

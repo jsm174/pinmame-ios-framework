@@ -125,6 +125,7 @@
  #include "lisy/lisy1.h"
  #include "lisy/utils.h"
 #endif /* PINMAME && LISY_SUPPORT */
+#include "../ext/vgm/vgmwrite.h"
 
 /***************************************************************************
 
@@ -439,6 +440,8 @@ static int init_machine(void)
 		goto cant_init_memory;
 	}
 
+	vgm_start(Machine);
+
 	/* call the game driver's init function */
 	if (gamedrv->driver_init)
 		(*gamedrv->driver_init)();
@@ -613,6 +616,8 @@ static void shutdown_machine(void)
 {
 	int i;
 
+	vgm_stop();
+
 #ifdef MESS
 	/* close down any devices */
 	devices_exit();
@@ -716,7 +721,7 @@ static int vh_open(void)
 	compute_aspect_ratio(Machine->drv, &params.aspect_x, &params.aspect_y);
 	params.depth = Machine->color_depth;
 	params.colors = palette_get_total_colors_with_ui();
-	params.fps = Machine->drv->frames_per_second;
+	params.fps = (float)Machine->drv->frames_per_second;
 	params.video_attributes = Machine->drv->video_attributes;
 	params.orientation = Machine->orientation;
 
@@ -1675,7 +1680,6 @@ static int validitychecks(void)
 	UINT8 a,b;
 	int error = 0;
 
-
 	a = 0xff;
 	b = a + 1;
 	if (b > a)	{ printf("UINT8 must be 8 bits\n"); error = 1; }
@@ -1708,7 +1712,7 @@ static int validitychecks(void)
 			if ((drivers[i]->clone_of->clone_of->flags & NOT_A_DRIVER) == 0)
 			{
 				printf("%s: %s is a clone of a clone\n",drivers[i]->source_file,drivers[i]->name);
-				error = 1;
+				error = 1; //!! fails for the color roms
 			}
 		}
 

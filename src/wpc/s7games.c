@@ -158,6 +158,26 @@ S67S_SPEECHROMS000x(      "speech7.532",CRC(83ffb695) SHA1(f9151bdfdefd5c178ca7e
 S7_ROMEND
 CORE_CLONEDEF(jngld,l1,l2,"Jungle Lord (L-1)",1981,"Williams",s7_mS7S,0)
 
+/*
+Jungle Lord new tricks (JLnt) is a set of Home ROMs for the 1980 Williams Jungle Lord pinball machine. In addition to all original game rules, with minor sound and scoring tweaks, the following new tricks have been implemented (*operator adjustable feature):
+
+Skill Shots:
+Quickly locking a new ball in the lower or upper saucer awards 100k or Instant Multiball*, except during Stampede Mode.
+
+Extra Ball:
+Complete 1-2-3-4-5-sequence three times* to light Extra Ball in lower lock; progress is indicated by bonus lamps during completion and at each ball start.
+
+MB Bonus Frenzy:
+Each bonus advance during multiball sounds trumpet and instantly scores 20k*.
+
+Combo Shots:
+Quick 2-/3-way combos ([left inlane,] turnaround, lower lock) ring bell and score 100/250k, respectively, except during multiball.
+
+Magna Whirl:
+Whirl L-O-R-D letters with Magna-Save buttons to improve odds with the mini ball.
+
+These new tricks are intended to add fun and to encourage lower playfield play and risk taking. Scoring potential of the new Combo Shots and MB Bonus Frenzy are similar to those of Double Trouble and maxed out bonus in the original game.
+*/
 S7_ROMSTART8088(jngld,nt, "ic14.bin",   CRC(714bfdaa) SHA1(6d566578d1f6e445bf66e917699c99e91f4f9aca),
                           "ic17.532",   CRC(bb571a17) SHA1(fb0b7f247673dae0744d4188e1a03749a2237165),
                           "ic20.716",   CRC(dfb4b75a) SHA1(bcf017b01236f755cee419e398bbd8955ae3576a),
@@ -167,7 +187,9 @@ S67S_SPEECHROMS000x(      "speech7.532",CRC(83ffb695) SHA1(f9151bdfdefd5c178ca7e
                           "speech5.532",CRC(754bd474) SHA1(c05f48bb07085683de469603880eafd28dffd9f5),
                           "speech6.532",CRC(f2ac6a52) SHA1(5b3e743eac382d571fd049f92ea9955342b9ffa0))
 S7_ROMEND
-CORE_CLONEDEF(jngld,nt,l2,"Jungle Lord New Tricks",2013,"A.M. Thurnherr",s7_mS7S,0)
+CORE_CLONEDEF(jngld,nt,l2,"Jungle Lord (New Tricks)",2013,"A.M. Thurnherr",s7_mS7S,0)
+
+// A L1 version of JLNT exists, but idealjoker wants to redo some things in addition (so rerelease by early 2021?)
 
 /*--------------------------------
 / Pharaoh - Sys.7 (Game #504)
@@ -298,8 +320,9 @@ S7_ROMEND
 CORE_CLONEDEF(hypbl,l6,l4,"HyperBall (L-6 MOD High score save)",2006,"Jess M. Askey",s7_mS7S,0)
 
 /*----------------------------
-/ Barracora- Sys.7 (Game #510)
+/ Barracora - Sys.7 (Game #510)
 /----------------------------*/
+// Tournament MOD exists: Bara_20.mod.716 & bara_26.mod.716 and/or ic14_l2_multiplier.716
 INITGAMEFULL(barra,s7_dispS7,34,35,0, 0,20,21,22,29,30)
 S7_ROMSTART8088(barra,l1, "ic14.716",   CRC(522e944e) SHA1(0fa17b7912f8129e40de5fed8c3ccccc0a2a9366),
                           "ic17.532",   CRC(bb571a17) SHA1(fb0b7f247673dae0744d4188e1a03749a2237165),
@@ -311,7 +334,7 @@ S7_ROMEND
 CORE_GAMEDEF(barra,l1,"Barracora (L-1)",1981,"Williams",s7_mS7S,0)
 
 /*----------------------------
-/ Varkon- Sys.7 (Game #512)
+/ Varkon - Sys.7 (Game #512)
 /----------------------------*/
 INITGAMEFULL(vrkon,s7_dispS7,40,39,0, 33,41,0,0,0,0)
 S7_ROMSTART8088(vrkon,l1, "ic14.716",   CRC(3baba324) SHA1(522654e0d81458d8b31150dcb0cb53c29b334358),
@@ -323,13 +346,27 @@ S7_ROMEND
 #define input_ports_vrkon input_ports_s7
 CORE_GAMEDEF(vrkon,l1,"Varkon (L-1)",1982,"Williams",s7_mS7S,0)
 
+/*-------------------------------
+/ Spellbinder - Sys.7 - (Game #513) - NOT Released - Developed by Jess Askey see https://github.com/jessaskey/wms_perc
+/-------------------------------*/
+static core_tGameData splbnGameData = { GEN_S7, dispHypbl, {FLIP_SWNO(33,34), 0, 4}, NULL, {"", {0,0,0,0xf8,0x0f}, {0} } };
+static void init_splbn(void) { core_gameData = &splbnGameData; }
+#define input_ports_splbn input_ports_s7
+
+S7_ROMSTART000x(splbn,l0, "ic14.532",    CRC(940a817a) SHA1(2583ff6f6b6985d3ac85b4f120ebb002a10b65af),
+                          "ic17.532",    CRC(b38fde72) SHA1(17ef3ca354431307b6a79992c50cb2491b8a7631),
+                          "ic20.532",    CRC(ff765ebf) SHA1(14d42735291c3f6e112f19bd49a39e00059cf907))
+S67S_SOUNDROMS0(          "sound12.532", CRC(06051e5e) SHA1(f0ab4be812ceaf771829dd549f2a612156102a93))
+S7_ROMEND
+CORE_GAMEDEF(splbn,l0,"Spellbinder (L-0 BETA)",1982,"Williams / Jess M. Askey",s7_mS7S,0)
+
 /*----------------------------------
-/Time Fantasy- Sys.7 (Game #515)
+/Time Fantasy - Sys.7 (Game #515)
 /----------------------------------*/
 // MOVED TO tmfnt.c
 
 /*----------------------------
-/ Warlok- Sys.7 (Game #516)
+/ Warlok - Sys.7 (Game #516)
 /----------------------------*/
 INITGAMEFULL(wrlok,s7_dispS7,0,36,0, 13,14,15,20,21,0)
 S7_ROMSTART8088(wrlok,l3, "ic14.716",   CRC(291be241) SHA1(77fffa878f760583ef152a7939867621a61d58dc),

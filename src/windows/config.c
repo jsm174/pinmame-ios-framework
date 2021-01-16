@@ -89,6 +89,7 @@ struct rc_option pinmame_opts[] = {
         { "alpha_on_dmd", NULL, rc_bool, &pmoptions.alpha_on_dmd, "0",  0, 0, NULL, "Emulate alphanumeric display on DMD" },
         { "virtual_dmd",  NULL, rc_bool, &pmoptions.virtual_dmd,  "1",  0, 0, NULL, "Enable DMD emulation" },
 #endif /* PROC_SUPPORT */
+        { "vgmwrite", NULL, rc_bool, &pmoptions.vgmwrite, "0", 0, 0, NULL, "Enable to write a VGM of the current session (name is based on romname)" },
         { NULL, NULL, rc_end, NULL, NULL, 0, 0, NULL, NULL }
 };
 #endif /* PINMAME */
@@ -607,7 +608,7 @@ int cli_frontend_init (int argc, char **argv)
                         i = 0;
                         while (drivers[i]) i++; /* count available drivers */
 
-                        srand(time(0));
+                        srand((unsigned int)time(0));
                         /* call rand() once to get away from the seed */
                         rand();
                         game_index = rand() % i;

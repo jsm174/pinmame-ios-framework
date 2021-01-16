@@ -14,6 +14,7 @@
  280101 Added '-' as digit to allow shorter commands
  ****************************************************************************/
 
+#include <sys/stat.h>
 #include <ctype.h>
 #include "driver.h"
 #include "core.h"
@@ -34,14 +35,34 @@
 #define LOG(x)
 #endif
 
-#ifdef VPINMAME_ALTSOUND // for alternate/external sound processing
- #include "snd_alt.h"
-#endif
-#ifdef VPINMAME_PINSOUND // for PinSound support
+#ifndef _WIN32
+ #include <sys/time.h>
+ static unsigned int timeGetTime2()
+ {
+   struct timeval now;
+   gettimeofday(&now, NULL);
+   return now.tv_usec/1000;
+ }
+#else
  #ifndef WIN32_LEAN_AND_MEAN
  //#define WIN32_LEAN_AND_MEAN
  #endif
  #include <windows.h>
+ #ifdef VPINMAME
+ static DWORD timeGetTime2(void) {
+   return timeGetTime();
+ }
+ #else // VPINMAME
+ static DWORD timeGetTime2(void) {
+   return timer_get_time();
+ }
+ #endif
+#endif
+
+#ifdef VPINMAME_ALTSOUND // for alternate/external sound processing
+ #include "snd_alt.h"
+#endif
+#ifdef VPINMAME_PINSOUND // for PinSound support
  //#include <timeapi.h>
  //#include <Shlwapi.h>
  #include <tchar.h>
@@ -68,6 +89,7 @@ extern UINT8 debugger_focus;
 #define SMDCMD_DIGITTOGGLE SMDCMD_ZERO
 
 static int playCmd(int length, int *cmd);
+static void playNextCmd();
 static int checkName(const char *buf, const char *name);
 static void readCmds(int boardNo, const char *head);
 static void clrCmds(void);
@@ -95,9 +117,23 @@ static struct {
   int nextCmd[MAX_CMD_LENGTH+1];
 } locals;
 
+static struct {
+  void* file;
+  UINT32 offs;
+  int recording;
+  int dumping;
+  int spinner;
+  int nextWaveFileNo;
+  DWORD startTick;
+  DWORD silence;
+  int silentsamples;
+} wavelocals;
+
 static void wave_init(void);
 static void wave_exit(void);
 static void wave_handle(void);
+static void wave_next(void);
+
 /*---------------------------------*/
 /*-- init manual sound commands  --*/
 /*---------------------------------*/
@@ -134,7 +170,7 @@ void snd_cmd_exit(void) {
 }
 
 #ifdef VPINMAME_PINSOUND
-void getPinSoundDirectory(char path_pinsound_cwd[2048])
+static void getPinSoundDirectory(char path_pinsound_cwd[2048])
 {
 	char * pos;
 	char tmp_path[2048];
@@ -152,7 +188,7 @@ void getPinSoundDirectory(char path_pinsound_cwd[2048])
 	sprintf(path_pinsound_cwd,"%s\\PinSound\\", tmp_path);
 }
 
-BOOL WriteSlot(const HANDLE hFile, const LPTSTR const lpszMessage)
+static BOOL WriteSlot(const HANDLE hFile, const LPTSTR const lpszMessage)
 {
 	DWORD cbWritten;
 	const BOOL fResult = WriteFile(hFile,
@@ -164,7 +200,7 @@ BOOL WriteSlot(const HANDLE hFile, const LPTSTR const lpszMessage)
 	return fResult ? TRUE : FALSE;
 }
 
-BOOL sendToSlot(const HANDLE hFile, const TCHAR msg_to_pinsound_studio[100])
+static BOOL sendToSlot(const HANDLE hFile, const TCHAR msg_to_pinsound_studio[100])
 {
 	if (hFile != INVALID_HANDLE_VALUE && WriteSlot(hFile, TEXT(msg_to_pinsound_studio)))
 	{
@@ -177,7 +213,7 @@ BOOL sendToSlot(const HANDLE hFile, const TCHAR msg_to_pinsound_studio[100])
 	}
 }
 
-HANDLE makeWriteSlot(const LPTSTR slotName)
+static HANDLE makeWriteSlot(const LPTSTR slotName)
 {
 	const HANDLE hFile = CreateFile(slotName, 
 		GENERIC_WRITE, 
@@ -198,7 +234,7 @@ HANDLE makeWriteSlot(const LPTSTR slotName)
 	return hFile;
 }
 
-HANDLE makeReadSlot(const LPTSTR slotName)
+static HANDLE makeReadSlot(const LPTSTR slotName)
 {
 	const HANDLE hFile = CreateMailslot(slotName,
 		0,                             // no maximum message size
@@ -216,7 +252,7 @@ HANDLE makeReadSlot(const LPTSTR slotName)
 	return hFile;
 }
 
-BOOL readSlot(const HANDLE hFile, char * msg)
+static BOOL readSlot(const HANDLE hFile, char * msg)
 {
 	DWORD   msgSize;
 	DWORD	numRead;
@@ -271,7 +307,7 @@ BOOL readSlot(const HANDLE hFile, char * msg)
 	return FALSE;
 }
 
-void pinsound_exit()
+static void pinsound_exit()
 {
 	// send stop-all command to the PinSound Studio
 	if (pinsound_studio_enabled)
@@ -364,7 +400,7 @@ void reinit_pinSound(void)
 	}
 }
 
-void pinsound_handle(const int boardNo, const int cmd)
+static void pinsound_handle(const int boardNo, const int cmd)
 {
 	if (pinsound_studio_enabled && init_pinsound == FALSE)
 	{
@@ -429,7 +465,7 @@ void pinsound_handle(const int boardNo, const int cmd)
 				}
 			}
 		}
-		start_time_pinsound_log = timeGetTime();
+		start_time_pinsound_log = timeGetTime2();
 	}
 
 	if (init_pinsound)
@@ -453,7 +489,7 @@ void pinsound_handle(const int boardNo, const int cmd)
 
 			// write current sound cmd to PSREC file
 			if (fp_pinsound_log) {
-				fprintf(fp_pinsound_log, "%02x %lu\n", cmd, timeGetTime() - start_time_pinsound_log);
+				fprintf(fp_pinsound_log, "%02x %lu\n", cmd, timeGetTime2() - start_time_pinsound_log);
 				fflush(fp_pinsound_log);
 			}
 		}
@@ -520,8 +556,14 @@ int manual_sound_commands(struct mame_bitmap *bitmap) {
 #endif
 
   /*-- handle recording --*/
-  if (keyboard_pressed_memory_repeat(SMDCMD_RECORDTOGGLE,REPEATKEY))
+  if (keyboard_pressed_memory_repeat(SMDCMD_RECORDTOGGLE, REPEATKEY))
     wave_handle();
+  if (keyboard_pressed_memory_repeat(SMDCMD_DUMPTOGGLE, REPEATKEY)) {
+    if (!wavelocals.dumping)
+      wave_next();
+    else
+      wave_exit();
+  }
 
   /* Toggle command mode */
   if (keyboard_pressed_memory_repeat(SMDCMD_MODETOGGLE, REPEATKEY) &&
@@ -640,12 +682,16 @@ int manual_sound_commands(struct mame_bitmap *bitmap) {
     else { /* command mode */
       /*-- specific help --*/
       core_textOutf(SND_XROW, 65, BLACK, "UP/DOWN     Next/Prev command");
+      core_textOutf(SND_XROW, 75, BLACK, "F5          Record");
+      core_textOutf(SND_XROW, 85, BLACK, "F6          Record Altsound and CSV");
+
       if      ((keyboard_pressed_memory_repeat(SMDCMD_DOWN, REPEATKEY)) && locals.currCmd->prev)
         { locals.currCmd = locals.currCmd->prev; }
       else if ((keyboard_pressed_memory_repeat(SMDCMD_UP, REPEATKEY)) && locals.currCmd->next)
         { locals.currCmd = locals.currCmd->next; }
       else if (keyboard_pressed_memory_repeat(SMDCMD_PLAY, REPEATKEY))
         playCmd(locals.currCmd->length, locals.currCmd->cmd);
+
       core_textOutf(SND_XROW, 95, BLACK, "%-30s",locals.currCmd->name);
       for (ii = 0; ii < MAX_CMD_LENGTH; ii++)
         core_textOutf(SND_XROW + 13*ii, 105, BLACK,
@@ -763,6 +809,31 @@ static void clrCmds(void) {
   }
 }
 
+
+static void playNextCmd() {
+  int ii;
+  int command[MAX_CMD_LENGTH];
+  int count = 0;
+
+  if (++locals.digits[MAX_CMD_LENGTH * 2 - 1] >= 0x10) {
+    locals.digits[MAX_CMD_LENGTH * 2 - 1] = 0;
+    locals.digits[MAX_CMD_LENGTH * 2 - 2] = locals.digits[MAX_CMD_LENGTH * 2 - 2] + 1;
+    if (locals.digits[MAX_CMD_LENGTH * 2 - 2] == 0x10)
+      locals.digits[MAX_CMD_LENGTH * 2 - 2] = 0;
+  }
+
+  for (ii = 0; ii < MAX_CMD_LENGTH; ii++) {
+    if ((locals.digits[ii * 2] == 0x10) || (locals.digits[ii * 2 + 1] == 0x10)) {
+      locals.digits[ii * 2] = locals.digits[ii * 2 + 1] = 0x10;
+      continue;
+    }
+    command[count++] = locals.digits[ii * 2] * 16 + locals.digits[ii * 2 + 1];
+  }
+
+  wave_next();
+  playCmd(count, command);
+}
+
 static int playCmd(int length, int *cmd) {
   /*-- send a new command --*/
   if (length >= 0) {
@@ -793,13 +864,7 @@ static int playCmd(int length, int *cmd) {
 /* Local Functions */
 static int wave_open(char *filename);
 static void wave_close(void);
-static struct {
-  void  *file;
-  UINT32 offs;
-  int recording;
-  int spinner;
-  int nextWaveFileNo;
-} wavelocals;
+
 
 static void wave_init(void) {
   memset(&wavelocals, 0, sizeof(wavelocals));
@@ -807,6 +872,9 @@ static void wave_init(void) {
 static void wave_exit(void) {
   if (wavelocals.recording == 1) {
     wave_close(); wavelocals.recording = 0;
+  }
+  if (wavelocals.dumping == 1) {
+    wave_close(); wavelocals.dumping = 0;
   }
 }
 
@@ -830,6 +898,67 @@ static void wave_handle(void) {
   }
 }
 
+static void wave_next(void) {
+  FILE *csv = NULL;
+  char csvName[120];
+  struct stat stat_buffer;
+
+  if (stat("wave", &stat_buffer) != 0)
+#if defined(_WIN32)
+    _mkdir("wave");
+#else 
+    mkdir("wave", 0775);
+#endif
+
+  sprintf(csvName, "wave\\altsound-%s.csv", Machine->gamedrv->name);
+
+  // check if this filename is not already used
+  if (csv = fopen(csvName, "r")) {
+    fclose(csv);
+    csv = fopen(csvName, "a");
+  }
+  else {
+    csv = fopen(csvName, "w");
+    fprintf(csv, "ID,CHANNEL,DUCK,GAIN,LOOP,STOP,NAME,FNAME\n");
+  }
+
+  if (wavelocals.dumping == 1)
+  {
+    char dumpName[120];
+
+    wave_close(); 
+
+    sprintf(dumpName, "0x%01X%01X%01X%01X-%s", locals.digits[MAX_CMD_LENGTH * 2 - 4], locals.digits[MAX_CMD_LENGTH * 2 - 3], locals.digits[MAX_CMD_LENGTH * 2 - 2], locals.digits[MAX_CMD_LENGTH * 2 - 1], Machine->gamedrv->name);
+
+    if (locals.digits[MAX_CMD_LENGTH * 2 - 2] == 0x00 && locals.digits[MAX_CMD_LENGTH * 2 - 1] == 0x00)
+      wavelocals.dumping = 0;
+    else
+      if (mame_faccess(dumpName, FILETYPE_WAVE)) {
+        fclose(csv);
+        playNextCmd();
+      }
+      else {
+        fprintf(csv, "0x%01X%01X%01X%01X,", locals.digits[MAX_CMD_LENGTH * 2 - 4], locals.digits[MAX_CMD_LENGTH * 2 - 3], locals.digits[MAX_CMD_LENGTH * 2 - 2], locals.digits[MAX_CMD_LENGTH * 2 - 1]);
+        fprintf(csv, ",80,50,0,0,%s,%s.wav\n", dumpName, dumpName);
+        wavelocals.dumping = wave_open(dumpName);
+      }
+  }
+  else {
+    char dumpName[120];
+
+    sprintf(dumpName, "0x%01X%01X%01X%01X-%s", locals.digits[MAX_CMD_LENGTH * 2 - 4], locals.digits[MAX_CMD_LENGTH * 2 - 3], locals.digits[MAX_CMD_LENGTH * 2 - 2], locals.digits[MAX_CMD_LENGTH * 2 - 1], Machine->gamedrv->name);
+    if (mame_faccess(dumpName, FILETYPE_WAVE))
+      wavelocals.dumping = 0;
+    else {
+      fprintf(csv, "0x%01X%01X%01X%01X,", locals.digits[MAX_CMD_LENGTH * 2 - 4], locals.digits[MAX_CMD_LENGTH * 2 - 3], locals.digits[MAX_CMD_LENGTH * 2 - 2], locals.digits[MAX_CMD_LENGTH * 2 - 1]);
+      fprintf(csv, ",80,50,0,0,%s,%s.wav\n", dumpName, dumpName);
+      wavelocals.dumping = wave_open(dumpName);
+    }
+  }
+  if(csv)
+    fclose(csv);
+}
+
 #ifdef LSB_FIRST
 #define intel32(x) (x)
 #define intel16(x) (x)
@@ -846,6 +975,9 @@ static int wave_open(char *filename) {
   wavelocals.file = mame_fopen(Machine->gamedrv->name, filename, FILETYPE_WAVE, 1);
 
   if (!wavelocals.file) return -1;
+  wavelocals.startTick = timeGetTime2();
+  wavelocals.silence = timeGetTime2();
+  wavelocals.silentsamples = 0;
   /* write the core header for a WAVE file */
   wavelocals.offs = mame_fwrite(wavelocals.file, "RIFF", 4);
   /* filesize, updated when the file is closed */
@@ -865,10 +997,10 @@ static int wave_open(char *filename) {
   temp16 = intel16(channels);
   wavelocals.offs += mame_fwrite(wavelocals.file, &temp16, 2);
   /* sample rate */
-  temp32 = intel32(Machine->sample_rate);
+  temp32 = intel32((int)(Machine->sample_rate+0.5));
   wavelocals.offs += mame_fwrite(wavelocals.file, &temp32, 4);
   /* byte rate */
-  temp32 = intel32(channels * Machine->sample_rate * 2);
+  temp32 = intel32(channels * (int)(Machine->sample_rate+0.5) * 2);
   wavelocals.offs += mame_fwrite(wavelocals.file, &temp32, 4);
   /* block align */
   temp16 = intel16(2*channels);
@@ -886,8 +1018,10 @@ static int wave_open(char *filename) {
 }
 
 static void wave_close(void) {
-  if (wavelocals.recording == 1) {
+  if (wavelocals.recording == 1 || wavelocals.dumping == 1) {
     UINT32 temp32;
+    if (wavelocals.file == NULL)
+      return;
     mame_fseek(wavelocals.file, 4, SEEK_SET);
     temp32 = intel32(wavelocals.offs);
     mame_fwrite(wavelocals.file, &temp32, 4);
@@ -905,9 +1039,58 @@ static void wave_close(void) {
 /* exported functions */
 /*--------------------*/
 /* called from mixer.c */
+
+int is_silent(const INT16* const buf, int size)
+{
+  int i;
+  for (i = 0; i < size; i++)
+    if (buf[i] > 9)
+      return 0;
+  return 1;
+}
+
 void pm_wave_record(INT16 *buffer, int samples) {
-  if (wavelocals.recording == 1) {
-    int written = mame_fwrite_lsbfirst(wavelocals.file, buffer, samples * 2 * CHANNELCOUNT);
+  int written = 0;
+  if (wavelocals.dumping == 1) {
+		const DWORD tick = timeGetTime2();
+		if (!is_silent(buffer, samples * CHANNELCOUNT))
+			wavelocals.silence = tick;
+
+		if (wavelocals.offs > 44) {
+			if (wavelocals.silence == tick) {
+				if (wavelocals.silentsamples > 0) {
+					int i = 0;
+					INT16 * const silentBuffer = malloc(samples * 2 * CHANNELCOUNT);
+					memset(silentBuffer, 0x00, samples * 2 * CHANNELCOUNT);
+					for (i = 0; i < wavelocals.silentsamples; i++) {
+						written = mame_fwrite_lsbfirst(wavelocals.file, silentBuffer, samples * 2 * CHANNELCOUNT);
+						wavelocals.offs += written;
+					}
+					free(silentBuffer);
+					wavelocals.silentsamples = 0;
+				}
+				written = mame_fwrite_lsbfirst(wavelocals.file, buffer, samples * 2 * CHANNELCOUNT);
+				wavelocals.offs += written;
+				if (written < samples * 2) {
+					wave_close(); wavelocals.dumping = -1;
+				}
+			}
+			else {
+				wavelocals.silentsamples++;
+			}
+		}
+		else if (wavelocals.offs == 44 && wavelocals.silence != tick) {
+			written = mame_fwrite_lsbfirst(wavelocals.file, buffer, samples * 2 * CHANNELCOUNT);
+			wavelocals.offs += written;
+			if (written < samples * 2) {
+				wave_close(); wavelocals.dumping = -1;
+			}
+		}
+		if ((tick - wavelocals.silence > 2000) || (tick - wavelocals.startTick > 240000))
+			playNextCmd();
+  }
+  else if (wavelocals.recording == 1) {
+    written = mame_fwrite_lsbfirst(wavelocals.file, buffer, samples * 2 * CHANNELCOUNT);
     wavelocals.offs += written;
     if (written < samples * 2) {
       wave_close(); wavelocals.recording = -1;

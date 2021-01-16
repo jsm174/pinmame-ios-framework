@@ -3,7 +3,7 @@
 ** All rights reserved.
 **
 ** This code is released under 2-clause BSD license. Please see the
-** file at : https://github.com/erikd/libsamplerate/blob/master/COPYING
+** file at : https://github.com/libsndfile/libsamplerate/blob/master/COPYING
 */
 
 #include <stdio.h>
@@ -14,7 +14,7 @@
 #include "float_cast.h"
 #include "common.h"
 
-static int linear_vari_process (SRC_PRIVATE *psrc, SRC_DATA *data) ;
+static enum SRC_ERR linear_vari_process (SRC_PRIVATE *psrc, SRC_DATA *data) ;
 static void linear_reset (SRC_PRIVATE *psrc) ;
 
 /*========================================================================================
@@ -36,7 +36,7 @@ typedef struct
 /*----------------------------------------------------------------------------------------
 */
 
-static int
+static enum SRC_ERR
 linear_vari_process (SRC_PRIVATE *psrc, SRC_DATA *data)
 {	LINEAR_DATA *priv ;
 	double		src_ratio, input_index, rem ;
@@ -79,7 +79,7 @@ linear_vari_process (SRC_PRIVATE *psrc, SRC_DATA *data)
 
 		for (ch = 0 ; ch < priv->channels ; ch++)
 		{	data->data_out [priv->out_gen] = (float) (priv->last_value [ch] + input_index *
-										(data->data_in [ch] - priv->last_value [ch])) ;
+										((double) data->data_in [ch] - priv->last_value [ch])) ;
 			priv->out_gen ++ ;
 			} ;
 
@@ -104,7 +104,7 @@ linear_vari_process (SRC_PRIVATE *psrc, SRC_DATA *data)
 
 		for (ch = 0 ; ch < priv->channels ; ch++)
 		{	data->data_out [priv->out_gen] = (float) (data->data_in [priv->in_used - priv->channels + ch] + input_index *
-						(data->data_in [priv->in_used + ch] - data->data_in [priv->in_used - priv->channels + ch])) ;
+						((double) data->data_in [priv->in_used + ch] - data->data_in [priv->in_used - priv->channels + ch])) ;
 			priv->out_gen ++ ;
 			} ;
 
@@ -157,7 +157,7 @@ linear_get_description (int src_enum)
 	return NULL ;
 } /* linear_get_descrition */
 
-int
+enum SRC_ERR
 linear_set_converter (SRC_PRIVATE *psrc, int src_enum)
 {	LINEAR_DATA *priv = NULL ;
 
@@ -206,4 +206,3 @@ linear_reset (SRC_PRIVATE *psrc)
 
 	return ;
 } /* linear_reset */
-

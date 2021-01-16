@@ -36,6 +36,7 @@
 
 #include "driver.h"
 
+#include "../ext/vgm/vgmwrite.h"
 
 #define MAX_OUTPUT 0x7fff
 
@@ -44,7 +45,6 @@
 struct SN76496
 {
 	int Channel;
-	int SampleRate;
 	int VolTable[16];	    /* volume table         */
 	INT32 Register[8];	    /* registers */
 	INT32 LastRegister;	    /* last register written */
@@ -57,6 +57,8 @@ struct SN76496
     INT32 Period[4];
 	INT32 Count[4];
 	INT32 Output[4];
+
+	unsigned short vgm_idx;
 };
 
 
@@ -71,6 +73,8 @@ static void SN76496Write(int chip,int data)
 
 	/* update the output buffer before changing the registers */
 	stream_update(R->Channel,0);
+
+	vgm_write(R->vgm_idx, 0x00, data, 0x00);
 
 	if (data & 0x80)
 	{
@@ -284,21 +288,19 @@ static void SN76496_set_gain(int chip,int gain)
 
 
 
-static int SN76496_init(const struct MachineSound *msound,int chip,int clock,int volume)
+static int SN76496_init(const struct MachineSound *msound,int chip,double clock,int volume)
 {
 	int i;
 	struct SN76496 *R = &sn[chip];
 	char name[40];
 
-	int sample_rate = clock/16;
+	double sample_rate = clock/16.;
 
 	sprintf(name,"SN76496 #%d",chip);
 	R->Channel = stream_init(name,volume,sample_rate,chip,SN76496Update);
 
 	if (R->Channel == -1)
 		return 1;
-
-	R->SampleRate = sample_rate;
 
 	for (i = 0;i < 4;i++) R->Volume[i] = 0;
 
@@ -341,11 +343,20 @@ static int generic_start(const struct MachineSound *msound, int feedbackmask, in
 
 		SN76496_set_gain(chip,(intf->volume[chip] >> 8) & 0xff);
 
-        R = &sn[chip];
+		R = &sn[chip];
 
-        R->FeedbackMask = feedbackmask;
-        R->WhitenoiseTaps = noisetaps;
-        R->WhitenoiseInvert = noiseinvert;
+		R->FeedbackMask = feedbackmask;
+		R->WhitenoiseTaps = noisetaps;
+		R->WhitenoiseInvert = noiseinvert;
+
+		R->vgm_idx = vgm_open(VGMC_SN76496, intf->baseclock[chip]); //!!
+		vgm_header_set(R->vgm_idx, 0x01, R->FeedbackMask);
+		vgm_header_set(R->vgm_idx, 0x02, R->WhitenoiseTaps);
+		//!! vgm_header_set(R->vgm_idx, 0x03, m_whitenoise_tap2);
+		vgm_header_set(R->vgm_idx, 0x04, R->WhitenoiseInvert); //!! m_negate);
+		vgm_header_set(R->vgm_idx, 0x05, 0); //!! m_stereo);
+		vgm_header_set(R->vgm_idx, 0x06, 1); //!! m_clock_divider);
+		vgm_header_set(R->vgm_idx, 0x07, 0); //!! m_sega_style_psg); // how ironic that it does just the opposite of its name
 	}
 	return 0;
 }

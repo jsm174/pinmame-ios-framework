@@ -3,7 +3,19 @@ What's new in PinMAME:
 (see whatsnewVPM.txt for the Visual PinMAME exclusive changes!)
 
 
-Version 3.3 (X X, 2020) - "20 years already?"
+Version 3.4 (X X, 2021) - ""
+------------------------------------------------------------------------------
+
+*** CORE/CPU ***
+Fix regression in solenoid emulation for Juegos Populares
+
+*** ROM SUPPORT *** Thanks to Brent Walker
+Clones:
+Lucky Draw (alternate version - only different #3 ROM)
+
+
+
+Version 3.3 (December 24th, 2020) - "20 years already?"
 ------------------------------------------------------------------------------
 
 Compiling for iOS is now possible.
@@ -13,9 +25,9 @@ Fix -listxml for strings that contain embedded tags
 pinPROC : updated library;  VS2019 build
 YAML-cpp: updated to 0.6.3; VS2019 build
 
-Updated LISY support to 5.26-26 (Linux for Gottlieb System1 & System80, Bally, Atari, Williams and 'HOme' Pinballs)
+Updated LISY support to 5.26-41 (Linux for Gottlieb System1 & System80, Bally, Atari, Williams and 'HOme' Pinballs)
 
-Added VGM file output support for AY8910, OKI6295, OKI6376, SAA1099, YM2151, YM2203, YMF262(OPL3), YM3526, YM3812, Y8950, and SN7648/9X (unsure about the mappings for these latter ones though!) sound chips
+Added VGM file output support for AY8910, OKI6295, OKI6376, QSound, SAA1099, YM2151, YM2203, YMF262(OPL3), YM3526, YM3812, Y8950, and SN7648/9X (unsure about the mappings for these latter ones though!) sound chips
  Either use -vgmwrite on the commmand line (PinMAME)
  or select it in the game options (this requires a restart though, as VGM output requires to track everything)
 
@@ -62,6 +74,8 @@ Slightly improve overall YM2203, YM3526, YM3812, Y8950 emulation (older Alvin G.
 Improve SAA1099 emulation (E.F.O.)
 Switch Votrax/SC01 emulation over to real simulation core (some GTS80(A)s and Taitos)
 Correct handling of Gottlieb System 1 displays (thanks to bontango)
+Got Goofy Hoops working as some schematics showed up, illustrating how useful such documents are!
+Make Williams Flash L-1 and T-1 use the Sys6 board (as these are newer than the yellow flipper based L-2)
 
 *** SIMULATOR ***
 Demolition Man: Added lamp layout, simulated all major shots (except maybe a weak car crash shot), the elevator and cryoclaw mechanism, along with the right ramp diverter that feeds it, and enabled the Buy-In button
@@ -142,6 +156,7 @@ Space Train (old hardware)
 Spider-Man 1.02 (English, French)
 Star Trek 25th Anniversary 3.00 (unofficial MOD)
 Star Wars 1.01
+Strange Science rev. C (which makes this the newest we have :))
 Striker Xtreme 1.00 (Italian)
 Theatre of Magic 1.3XC (competition MOD) (updated)
 Trident (MOD rev. 23c)

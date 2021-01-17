@@ -69,6 +69,7 @@
 // Sound
 #define HAS_DAC        1
 #define HAS_YM2151_ALT 1
+//#define HAS_YM2151_NUKED 1
 #define HAS_HC55516    1
 #define HAS_MC3417     1
 #define HAS_SAMPLES    1
@@ -97,6 +98,7 @@
 #define HAS_YMF262     1
 #define HAS_MEA8000    1
 #define HAS_SAA1099    1
+#define HAS_QSOUND     1
 #endif /* _MSC_VER */
 
 #if defined(_MSC_VER) || defined(__APPLE__) // Disable some VC++ warnings
@@ -108,10 +110,14 @@
 #undef INLINE
 #endif
 
-#if defined(_DEBUG) || defined(__APPLE__)
+#if defined(_DEBUG)
  #define INLINE static
 #else
- #define INLINE static __forceinline
+ #if defined __LP64__ || defined _WIN64 // at least VC2015s 64bit linker gets stuck
+  #define INLINE static __inline
+ #else
+  #define INLINE static __forceinline
+ #endif
 #endif
 //#pragma warning(disable:4018)		// "signed/unsigned mismatch"
 //#pragma warning(disable:4146)		// "unary minus operator applied to unsigned type"

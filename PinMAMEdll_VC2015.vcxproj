@@ -310,7 +310,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>bass.lib;zlibstatmtd.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(ProjectName)_VC2015vcd.exe</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>ext\bass;ext\zlib\lib_vc9;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -888,6 +888,7 @@
     <ClCompile Include="src\sound\mea8000.c" />
     <ClCompile Include="src\sound\mixer.c" />
     <ClCompile Include="src\sound\msm5205.c" />
+    <ClCompile Include="src\sound\qsound.c" />
     <ClCompile Include="src\sound\s14001a.c" />
     <ClCompile Include="src\sound\saa1099.c" />
     <ClCompile Include="src\sound\samples.c" />
@@ -960,6 +961,7 @@
     <ClCompile Include="src\wpc\dedmd.c" />
     <ClCompile Include="src\wpc\degames.c" />
     <ClCompile Include="src\wpc\desound.c" />
+    <ClCompile Include="src\wpc\dmddevice.cpp" />
     <ClCompile Include="src\wpc\driver.c" />
     <ClCompile Include="src\wpc\efo.c" />
     <ClCompile Include="src\wpc\efosnd.c" />
@@ -1237,6 +1239,7 @@
     <ClInclude Include="src\sound\mea8000.h" />
     <ClInclude Include="src\sound\mixer.h" />
     <ClInclude Include="src\sound\msm5205.h" />
+    <ClInclude Include="src\sound\qsound.h" />
     <ClInclude Include="src\sound\s14001a.h" />
     <ClInclude Include="src\sound\saa1099.h" />
     <ClInclude Include="src\sound\samples.h" />
@@ -1310,7 +1313,9 @@
     <ClInclude Include="src\wpc\zacsnd.h" />
     <ClInclude Include="src\vc\dirent.h" />
     <ClInclude Include="src\vc\unistd.h" />
-    <ClInclude Include="ext\vgm\vgmwrite.c" />
+    <ClCompile Include="ext\vgm\vgmwrite.c">
+      <FileType>CppCode</FileType>
+    </ClCompile>
     <ClInclude Include="ext\vgm\vgmwrite.h" />
     <ClInclude Include="ext\zlib\include\zconf.h" />
     <ClInclude Include="ext\zlib\include\zlib.h" />

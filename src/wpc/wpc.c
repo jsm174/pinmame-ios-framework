@@ -189,16 +189,6 @@ static void wpc_zc(int data) {
 	wpclocals.zc = 1;
 }
 
-/* The FIRQ line is wired between the WPC chip and all external I/Os (sound) */
-/* The DMD firq must be generated via the WPC but I don't how. */
-static void wpc_firq(int set, int src) {
-  if (set)
-    wpclocals.firqSrc |= src;
-  else
-    wpclocals.firqSrc &= ~src;
-  cpu_set_irq_line(WPC_CPUNO, M6809_FIRQ_LINE, wpclocals.firqSrc ? HOLD_LINE : CLEAR_LINE);
-}
-
 void wpc_set_modsol_aux_board(int board)
 {
 	wpc_modsol_aux_board = board;
@@ -562,6 +552,16 @@ static INTERRUPT_GEN(wpc_vblank) {
 #endif
       (wpclocals.vblankCount % WPC_VBLANKDIV) == 0) /*-- update switches --*/
     core_updateSw((core_gameData->gen & GENWPC_HASFLIPTRON) ? TRUE : (wpc_data[WPC_GILAMPS] & 0x80));
+}
+
+/* The FIRQ line is wired between the WPC chip and all external I/Os (sound) */
+/* The DMD firq must be generated via the WPC but I don't how. */
+static void wpc_firq(int set, int src) {
+  if (set)
+    wpclocals.firqSrc |= src;
+  else
+    wpclocals.firqSrc &= ~src;
+  cpu_set_irq_line(WPC_CPUNO, M6809_FIRQ_LINE, wpclocals.firqSrc ? HOLD_LINE : CLEAR_LINE);
 }
 
 /*----------------------

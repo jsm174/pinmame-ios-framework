@@ -16,6 +16,8 @@ bool g_useConsole = false;
 
 void ShowConsole()
 {
+	if (g_useConsole)
+		return;
 	g_useConsole = true;
 	FILE* pConsole;
 	AllocConsole();
@@ -26,6 +28,7 @@ void CloseConsole()
 {
 	if (g_useConsole)
 		FreeConsole();
+	g_useConsole = false;
 }
 #endif
 #else
@@ -64,15 +67,17 @@ extern "C"
 	UINT8 win_trying_to_quit;
 	volatile int g_fPause = 0;
 	volatile int g_fDumpFrames = 0;
+	char g_fShowWinDMD = 0;
+	char g_fShowPinDMD = 0; /* pinDMD */
 
-	char g_szGameName[256] = "";			// String containing requested game name (may be different from ROM if aliased)
+	char g_szGameName[256] = { 0 }; // String containing requested game name (may be different from ROM if aliased)
 
 	extern int channels;
 
 	struct rc_struct *rc;
 }
 
-char g_vpmPath[MAX_PATH];
+char g_vpmPath[MAX_PATH] = { 0 };
 int g_sampleRate = 48000;
 bool g_isGameReady = false;
 static std::thread* pRunningGame = nullptr;
@@ -111,7 +116,7 @@ int GetGameNumFromString(char *name)
 		return gamenum;
 }
 
-char* composePath(char* path, char* file)
+char* composePath(const char* path, const char* file)
 {
 	size_t pathl = strlen(path);
 	size_t filel = strlen(file);
@@ -135,7 +140,7 @@ void gameThread(int game_index=-1)
 {
 	if (game_index == -1)
 		return;
-	int res = run_game(game_index);
+	/*int res =*/ run_game(game_index);
 }
 
 
@@ -148,7 +153,7 @@ void gameThread(int game_index=-1)
 
 PINMAMEDLL_API void SetVPMPath(char* path)
 {
-	strcpy(g_vpmPath, path);
+	strcpy_s(g_vpmPath, path);
 }
 
 PINMAMEDLL_API void SetSampleRate(int sampleRate)
@@ -162,10 +167,15 @@ PINMAMEDLL_API void SetSampleRate(int sampleRate)
 
 PINMAMEDLL_API int StartThreadedGame(char* gameNameOrg, bool showConsole)
 {
+	if (pRunningGame)
+		return -1;
+
 #ifdef ENABLE_CONSOLE_DEBUG
 	if (showConsole)
 		ShowConsole();
 #endif
+	trying_to_quit = 0;
+
 	rc = cli_rc_create();
 
 	strcpy_s(g_szGameName, gameNameOrg);
@@ -208,6 +218,7 @@ void StopThreadedGame(bool locking)
 {
 	if (pRunningGame == nullptr)
 		return;
+
 	trying_to_quit = 1;
 	OnStateChange(1);
 
@@ -219,6 +230,11 @@ void StopThreadedGame(bool locking)
 
 	delete(pRunningGame);
 	pRunningGame = nullptr;
+
+	//rc_unregister(rc, opts);
+	rc_destroy(rc);
+
+	g_szGameName[0] = '\0';
 
 #ifdef ENABLE_CONSOLE_DEBUG
 	CloseConsole();
@@ -273,9 +289,10 @@ PINMAMEDLL_API int GetRawDMDHeight()
 
 PINMAMEDLL_API int GetRawDMDPixels(unsigned char* buffer)
 {
-	if (g_raw_dmdx < 0 || g_raw_dmdy < 0)
+	if (g_raw_dmdx == ~0u || g_raw_dmdy == ~0u)
 		return -1;
 	memcpy(buffer, g_raw_dmdbuffer, g_raw_dmdx*g_raw_dmdy * sizeof(unsigned char));
+	g_needs_DMD_update = 0;
 	return g_raw_dmdx*g_raw_dmdy;
 }
 
@@ -307,7 +324,7 @@ PINMAMEDLL_API void SetSwitch(int slot, bool state)
 
 // Lamps related functions
 // -----------------------
-PINMAMEDLL_API int GetMaxLamps() {	return CORE_MAXLAMPCOL * 8; }
+PINMAMEDLL_API int GetMaxLamps() { return CORE_MAXLAMPCOL * 8; }
 
 PINMAMEDLL_API int GetChangedLamps(int* changedStates)
 {

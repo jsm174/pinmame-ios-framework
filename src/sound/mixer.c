@@ -452,7 +452,11 @@ static unsigned mixer_channel_resample_8(struct mixer_channel_data *channel, SRC
 	data.end_of_input = 0;
 	data.src_ratio = channel->to_frequency / channel->from_frequency;
 
-	src_process(src_state, &data);
+	if (src_process(src_state, &data) != SRC_ERR_NO_ERROR)
+	{
+		assert(!"src_process");
+		return (dst_pos - dst_base) & ACCUMULATOR_MASK;
+	}
 
 	// When using the src_process or src_callback_process APIs and updating the src_ratio field of the SRC_STATE struct,
 	// the library will try to smoothly transition between the conversion ratio of the last call and the conversion ratio of the current call.
@@ -497,7 +501,7 @@ static unsigned mixer_channel_resample_8_pan(struct mixer_channel_data *channel,
 }
 
 /* Mix a 16 bit channel */
-static unsigned mixer_channel_resample_16_pan(struct mixer_channel_data *channel, const float* const volume, const unsigned dst_len, INT16** src, const unsigned src_len)
+static unsigned mixer_channel_resample_16_pan(struct mixer_channel_data *channel, const float* const volume, const unsigned dst_len, const INT16** src, const unsigned src_len)
 {
 	unsigned count;
 
@@ -511,7 +515,7 @@ static unsigned mixer_channel_resample_16_pan(struct mixer_channel_data *channel
 	} else {
 		/* save */
 		const unsigned save_frac = channel->frac;
-		INT16* const save_src = *src;
+		const INT16* const save_src = *src;
 		count = mixer_channel_resample_16(channel, cl, volume[0], left_accum, dst_len, src, src_len, 0);
 		/* restore */
 		channel->frac = save_frac;
@@ -529,7 +533,7 @@ static unsigned mixer_channel_resample_16_pan(struct mixer_channel_data *channel
 
 void mix_sample_8(struct mixer_channel_data *channel, int samples_to_generate)
 {
-	INT8 *source, *source_end;
+	const INT8 *source, *source_end;
 	float mixing_volume[2];
 
 	/* compute the overall mixing volume */
@@ -578,7 +582,7 @@ void mix_sample_8(struct mixer_channel_data *channel, int samples_to_generate)
 
 void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 {
-	INT16 *source, *source_end;
+	const INT16 *source, *source_end;
 	float mixing_volume[2];
 
 	/* compute the overall mixing volume */
@@ -634,7 +638,7 @@ static INT8 silence_data[FILTER_FLUSH];
 /* Flush the state of the filter playing some 0 samples */
 static void mixer_flush(struct mixer_channel_data *channel)
 {
-	INT8 *source_begin, *source_end;
+	const INT8 *source_begin, *source_end;
 	float mixing_volume[2];
 	unsigned save_available;
 
@@ -1138,7 +1142,7 @@ void mixer_write_config(mame_file *f)
 	mixer_play_streamed_sample_16
 ***************************************************************************/
 
-void mixer_play_streamed_sample_16(const int ch, INT16 *data, int len, const double freq)
+void mixer_play_streamed_sample_16(const int ch, const INT16 *data, int len, const double freq)
 {
 	struct mixer_channel_data *channel = &mixer_channel[ch];
 	float mixing_volume[2];
@@ -1197,7 +1201,7 @@ int mixer_need_samples_this_frame(const int channel,const double freq)
 	mixer_play_sample
 ***************************************************************************/
 
-void mixer_play_sample(const int ch, INT8 *data, const int len, const double freq, const UINT8 loop)
+void mixer_play_sample(const int ch, const INT8 *data, const int len, const double freq, const UINT8 loop)
 {
 	struct mixer_channel_data *channel = &mixer_channel[ch];
 
@@ -1226,7 +1230,7 @@ void mixer_play_sample(const int ch, INT8 *data, const int len, const double fre
 	mixer_play_sample_16
 ***************************************************************************/
 
-void mixer_play_sample_16(const int ch, INT16 *data, const int len, const double freq, const UINT8 loop)
+void mixer_play_sample_16(const int ch, const INT16 *data, const int len, const double freq, const UINT8 loop)
 {
 	struct mixer_channel_data *channel = &mixer_channel[ch];
 

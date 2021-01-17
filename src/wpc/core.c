@@ -12,8 +12,9 @@
 #ifdef PROC_SUPPORT
  #include "p-roc/p-roc.h"
 #endif
-#ifdef VPINMAME
- #include <windows.h>
+
+#if defined(VPINMAME) || defined(PINMAME_DLL)
+ #include <Windows.h>
 #endif
 #if defined(VPINMAME) || defined(PINMAME_DLL) || defined(PINMAME_FRAMEWORK)
  #include "dmddevice.h"
@@ -48,7 +49,7 @@ int vp_getDip(int bank) { return 0; }
 void vp_setDIP(int bank, int value) { }
 #endif
 
-#if defined(VPINMAME) || defined(PINMAME_DLL)
+#if defined(VPINMAME) || defined(PINMAME_DLL) 
   #include "vpintf.h"
   extern int g_fPause;
   extern int g_fHandleKeyboard, g_fHandleMechanics;
@@ -918,7 +919,7 @@ void video_update_core_dmd(struct mame_bitmap *bitmap, const struct rectangle *c
   osd_mark_dirty(layout->left*locals.displaySize,layout->top*locals.displaySize,
                  (layout->left+layout->length)*locals.displaySize,(layout->top+layout->start)*locals.displaySize);
 
-#ifdef VPINMAME
+#if defined(VPINMAME) || defined(PINMAME_DLL)
 
   if ((layout->length == 128) || (layout->length == 192) || (layout->length == 256)) { // filter 16x8 output from Flipper Football
 
@@ -1028,7 +1029,7 @@ INLINE int inRect(const struct rectangle *r, int left, int top, int width, int h
 static void updateDisplay(struct mame_bitmap *bitmap, const struct rectangle *cliprect,
                           const struct core_dispLayout *layout, int *pos)
 {
-#ifdef VPINMAME
+#if defined(VPINMAME) || defined(PINMAME_DLL)
   static UINT16 seg_data[CORE_SEGCOUNT]; // use static, in case a dmddevice.dll keeps the pointers around
   static char seg_dim[CORE_SEGCOUNT];
   static UINT8 disp_num_segs[64]; // actually max seen was 48 so far, but.. // segments per display
@@ -1038,7 +1039,7 @@ static void updateDisplay(struct mame_bitmap *bitmap, const struct rectangle *cl
 
   if (layout == NULL) { DBGLOG(("gen_refresh without LCD layout\n")); return; }
 
-#ifdef VPINMAME
+#if defined(VPINMAME) || defined(PINMAME_DLL)
   memset(seg_data, 0, CORE_SEGCOUNT*sizeof(UINT16));
   memset(seg_dim, 0, CORE_SEGCOUNT*sizeof(char));
   disp_num_segs[0] = 0;
@@ -1057,7 +1058,7 @@ static void updateDisplay(struct mame_bitmap *bitmap, const struct rectangle *cl
       UINT16 *lastSeg = &locals.lastSeg[layout->start].w;
       int step     = (layout->type & CORE_SEGREV) ? -1 : 1;
 
-#ifdef VPINMAME
+#if defined(VPINMAME) || defined(PINMAME_DLL)
       disp_num_segs[total_disp++] = ii;
 #endif
 
@@ -1102,7 +1103,7 @@ static void updateDisplay(struct mame_bitmap *bitmap, const struct rectangle *cl
             tmpSeg |= (tmpSeg & 0x100)<<1;
             break;
           }
-#ifdef VPINMAME
+#if defined(VPINMAME) || defined(PINMAME_DLL)
           seg_dim[seg_idx] = coreGlobals.segDim[*pos] > 15 ? 15 : coreGlobals.segDim[*pos];
           seg_data[seg_idx++] = tmpSeg;
 #endif
@@ -1134,18 +1135,17 @@ static void updateDisplay(struct mame_bitmap *bitmap, const struct rectangle *cl
         seg += step; lastSeg += step;
       }
 #ifdef PROC_SUPPORT
-        		if (coreGlobals.p_rocEn) {
+			if (coreGlobals.p_rocEn) {
 				if ((core_gameData->gen & (GEN_WPCALPHA_1 | GEN_WPCALPHA_2 | GEN_ALLS11)) &&
 				    (!pmoptions.alpha_on_dmd)) {
 					procUpdateAlphaDisplay(proc_top, proc_bottom);
-
 				}
 			}
 #endif 
     }
   }
 
-#ifdef VPINMAME
+#if defined(VPINMAME) || defined(PINMAME_DLL)
   //alpha frame
   if(g_fShowPinDMD)
     renderAlphanumericFrame(core_gameData->gen, seg_data, seg_dim, total_disp, disp_num_segs);
@@ -1870,7 +1870,7 @@ static MACHINE_INIT(core) {
 /* TOM: this causes to draw the static sim text */
   schedule_full_refresh();
 
-#ifdef VPINMAME
+#if defined(VPINMAME) || defined(PINMAME_DLL)
   // DMD USB Init
   if(g_fShowPinDMD && !time_to_reset)
 	pindmdInit(g_szGameName, core_gameData->gen, &pmoptions);
@@ -1880,7 +1880,7 @@ static MACHINE_INIT(core) {
 static MACHINE_STOP(core) {
   int ii;
 
-#ifdef VPINMAME
+#if defined(VPINMAME) || defined(PINMAME_DLL)
   // DMD USB Kill
   if(g_fShowPinDMD && !time_to_reset)
 	pindmdDeInit();
@@ -1893,7 +1893,7 @@ static MACHINE_STOP(core) {
   raw_dmdoffs = 0;
 
   g_raw_gtswpc_dmdframes = 0;
-  
+
   g_needs_DMD_update = 1;
 #endif
 
@@ -2010,7 +2010,7 @@ static const unsigned char core_bits_set_table256[256] =
     B6(0), B6(1), B6(1), B6(2)
 };
 
-UINT8 core_calc_modulated_light(UINT32 bits, UINT32 bit_count, UINT8 *prev_level)
+UINT8 core_calc_modulated_light(UINT32 bits, UINT32 bit_count, volatile UINT8 *prev_level)
 {
 	//UINT8 outputlevel;
 	UINT32 targetlevel;

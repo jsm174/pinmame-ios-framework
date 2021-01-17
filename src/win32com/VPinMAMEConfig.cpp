@@ -252,6 +252,8 @@ void vpm_frontend_init(void) {
 }
 
 void vpm_frontend_exit(void) {
+  if (logfile) // don't know if this is legit to do here, but just be safe
+  { fclose(logfile); logfile = NULL; }
 }
 
 extern "C" {
@@ -358,8 +360,8 @@ void vpm_game_exit(int game_index) {
   /* close open files */
   if (options.language_file) /* this seems to never be opened in Win32 version */
     { mame_fclose(options.language_file); options.language_file = NULL; }
-  if (logfile)
-    { fclose(logfile); logfile = NULL; }
+  //if (logfile) // cannot close this here, as we did not open the file ourselves
+  //  { fclose(logfile); logfile = NULL; }
 }
 
 #if (!defined(PINMAME) || defined(MAME_DEBUG) || defined(_DEBUG)) // In PinMAME, log only in debug mode.
@@ -435,6 +437,8 @@ bool RegLoadOpts(HKEY hKey, rc_option *pOpt, char* pszDefault, char* pszValue)
 	char szValue[4096];
 	DWORD dwValue;
 
+	szValue[0] = '\0';
+
 	switch ( pOpt->type ) {
 	case rc_string:
 	case rc_float:
@@ -473,7 +477,7 @@ bool RegLoadOpts(HKEY hKey, rc_option *pOpt, char* pszDefault, char* pszValue)
 			fNew = true;
 		}
 		else
-			sprintf(szValue, "%i", dwValue);
+			sprintf(szValue, "%i", (int)dwValue); // needs to always be interpreted as int!
 		break;
 
 	case rc_bool:
@@ -796,7 +800,7 @@ void DeleteGameSettings(const char * const pszGameName)
 
 BOOL GetSetting(const char* const pszGameName, const char* const pszName, VARIANT *pVal)
 {
-	if ( !pszName && !*pszName )
+	if ( !pszName || !*pszName )
 		return FALSE;
 
 	if ( (pszGameName && IsGlobalSetting(pszName)) || IgnoreSetting(pszName) )
@@ -805,7 +809,7 @@ BOOL GetSetting(const char* const pszGameName, const char* const pszName, VARIAN
 	struct rc_option *option;
 	if(!(option = rc_get_option2(opts, pszName)))
 		return FALSE;
-	
+
 	HKEY hKey = 0;
 	char szKey[MAX_PATH];
 	lstrcpy(szKey, REG_BASEKEY);
@@ -871,7 +875,7 @@ BOOL GetSetting(const char* const pszGameName, const char* const pszName, VARIAN
 
 BOOL PutSetting(const char* const pszGameName, const char* const pszName, VARIANT vValue)
 {
-	if ( !pszName && !*pszName )
+	if ( !pszName || !*pszName )
 		return FALSE;
 
 	if ( (pszGameName && IsGlobalSetting(pszName)) || IgnoreSetting(pszName) )

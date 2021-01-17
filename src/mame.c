@@ -126,7 +126,9 @@
  #include "lisy/utils.h"
 #endif /* PINMAME && LISY_SUPPORT */
 #include "../ext/vgm/vgmwrite.h"
-
+#if !defined(_MSC_VER) //!! as not included in makefile build
+ #include "../ext/vgm/vgmwrite.c"
+#endif
 /***************************************************************************
 
 	Constants

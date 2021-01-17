@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include "driver.h"
 #include "rc.h"
@@ -9,15 +10,13 @@
 //============================================================
 
 // global parameters
-int							attenuation = 0;
+int attenuation = 0; //!! unused
 
 extern int g_fPause;
 
 //============================================================
 //	PARAMETERS
 //============================================================
-
-#define INGORE_UNDERFLOW_FRAMES	100
 
 // the local buffer is what the stream buffer feeds from
 // note that this needs to be large enough to buffer at frameskip 11
@@ -38,11 +37,6 @@ extern int g_fPause;
 // buffer
 int channels = 1;
 
-// buffer over/underflow counts
-static int					total_frames;
-static int					buffer_underflows;
-static int					buffer_overflows;
-
 // global sample tracking
 static double				samples_per_frame;
 static double				samples_left_over;
@@ -54,9 +48,6 @@ static int					writing_advance = 0;
 static int					audio_latency;
 static int					lower_thresh;
 static int					upper_thresh;
-
-// enabled state
-static int					is_enabled = 1;
 
 // sound options (none at this time)
 struct rc_option sound_opts[] =
@@ -107,12 +98,12 @@ static int writingToStreamDiff = 0;
 
 int osd_start_audio_stream(int stereo)
 {
-	printf("osd_start_audio_stream SampleRate:%d stereo:%d fps:%.2f\n", Machine->sample_rate,stereo, Machine->drv->frames_per_second);
+	printf("osd_start_audio_stream SampleRate:%.2f stereo:%d fps:%.2f\n", Machine->sample_rate,stereo, Machine->drv->frames_per_second);
 	channels = stereo ? 2 : 1;
 
 	// compute the buffer sizes
-	stream_buffer_size = ((UINT64)MAX_BUFFER_SIZE * (UINT64)(Machine->sample_rate)) / 44100; //!! 44100 ?!
-	stream_buffer_size = (int)((double)(stream_buffer_size * 30) / Machine->drv->frames_per_second);
+	stream_buffer_size = ((UINT64)MAX_BUFFER_SIZE * (UINT64)(Machine->sample_rate+0.5)) / 44100; //!! 44100 ?!
+	stream_buffer_size = (int)((double)(stream_buffer_size * 30) / Machine->drv->frames_per_second + 0.5);
 	stream_buffer_size = (stream_buffer_size / 1024) * 1024;
 	stream_buffer_size *= channels;
 	// compute the upper/lower thresholds
@@ -125,8 +116,8 @@ int osd_start_audio_stream(int stereo)
 	currentWritingBufferPos = 0;
 
 	// determine the number of samples per frame
-	samples_per_frame = (double)Machine->sample_rate / (double)Machine->drv->frames_per_second;
-	printf("sample_rate: %d frames_per_second: %.1f samples_per_frame: %.1f\n", Machine->sample_rate, Machine->drv->frames_per_second, samples_per_frame);
+	samples_per_frame = Machine->sample_rate / Machine->drv->frames_per_second;
+	printf("sample_rate: %.2f frames_per_second: %.1f samples_per_frame: %.1f\n", Machine->sample_rate, Machine->drv->frames_per_second, samples_per_frame);
 	// compute how many samples to generate the first frame
 	samples_left_over = samples_per_frame;
 	samples_this_frame = (UINT32)samples_left_over;
@@ -159,12 +150,12 @@ int osd_update_audio_stream(INT16 *buf)
 	{
 		streamingBuf[currentWritingBufferPos] = buf[i];
 		currentWritingBufferPos++;
-		if (currentWritingBufferPos >  stream_buffer_size)
+		if (currentWritingBufferPos >= stream_buffer_size)
 			currentWritingBufferPos = 0;
 		writingToStreamDiff++;
 	}
 
-	// Adjustement
+	// Adjustment
 	{
 		int potentialDiff = writingToStreamDiff - writing_advance;
 		
@@ -185,7 +176,7 @@ int osd_update_audio_stream(INT16 *buf)
 	samples_left_over -= (double)samples_this_frame;
 
 	samples_this_frame += current_adjustment;
-	
+
 	//if (streamingBufSize >= 0)
 	//	samples_this_frame = streamingBufSize;
 
@@ -195,12 +186,22 @@ int osd_update_audio_stream(INT16 *buf)
 
 void osd_stop_audio_stream(void)
 {
+	if(streamingBuf)
+		free(streamingBuf);
+	streamingBuf = NULL;
+	streamingBufferInitialized = 0;
+	writingToStreamDiff = 0;
+	currentWritingBufferPos = 0;
+	currentStreamingBufferPos = -1; // -1 means not ready
+	streamingBufSize = -1; // Hold the data to be out using get pending
+	current_adjustment = 0;
+	writing_advance = 0;
 }
 
 void forceResync()
 {
 	currentStreamingBufferPos = (int)((long)(currentWritingBufferPos - writing_advance) % (long)stream_buffer_size);
-	printf("Resync %d (dropped:%d samples)\n", writingToStreamDiff, (writingToStreamDiff- writing_advance));
+	printf("Resync %d (dropped:%d samples)\n", writingToStreamDiff, (writingToStreamDiff - writing_advance));
 	writingToStreamDiff = writing_advance;
 }
 
@@ -236,7 +237,7 @@ int fillAudioBuffer(float *const __restrict dest, const int outChannels, const i
 		{
 			dest[i] = (float)streamingBuf[currentStreamingBufferPos] * (float)(1./32768.0);
 			currentStreamingBufferPos++;
-			if (currentStreamingBufferPos > stream_buffer_size)
+			if (currentStreamingBufferPos >= stream_buffer_size)
 				currentStreamingBufferPos = 0;
 			//writingToStreamDiff--;
 		}
@@ -248,21 +249,27 @@ int fillAudioBuffer(float *const __restrict dest, const int outChannels, const i
 		const int nbToRead = nbOut / 2;
 		int outPos = 0;
 		int i;
+		assert((nbOut % 2) == 0);
 		for (i = 0; i < nbToRead; i++)
 		{
 			dest[outPos    ] = (float)streamingBuf[currentStreamingBufferPos] * (float)(1./32768.0);
 			dest[outPos + 1] = dest[outPos]; // Copy the mono on both out left and right
 			outPos += 2;
 			currentStreamingBufferPos++;
-			if (currentStreamingBufferPos > stream_buffer_size)
+			if (currentStreamingBufferPos >= stream_buffer_size)
 				currentStreamingBufferPos = 0;
 			//writingToStreamDiff--;
 		}
 		writingToStreamDiff -= nbToRead;
 	}
-	// TODO: stereo to mono
-	
-	if (writingToStreamDiff > writing_advance *2 || writingToStreamDiff <0)
+	else
+	if(channels == 2 && outChannels == 1) // Stereo to mono
+	{
+		assert(0);
+		//!! TODO
+	}
+
+	if (writingToStreamDiff > writing_advance*2 || writingToStreamDiff < 0)
 		forceResync();
 
 	return nbOut;

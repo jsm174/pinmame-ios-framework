@@ -97,7 +97,7 @@ static READ_HANDLER(pia1a_r) {
 }
 
 static READ_HANDLER(pia1b_r) {
-  static UINT8 lastSw9;
+  static UINT8 lastSw9 = 0;
   UINT8 retVal;
   UINT8 sw9 = coreGlobals.swMatrix[9] & 0xf0;
   UINT8 newSw9 = sw9;
@@ -128,20 +128,21 @@ static void showSegment(int num, UINT8 data) {
   }
 }
 
-static int countBits(UINT8 data) {
-  int cnt = 0;
-  int i;
-  for (i = 0; i < 8; i++) {
-    if (data & (1 << i)) {
-      cnt++;
-    }
-  }
-  return cnt;
+/*static int countBits(UINT8 b) {
+    int cnt;
+    for (cnt = 0; b != 0; cnt++)
+        b &= b - 1;
+
+    return cnt;
+}*/
+
+static int singleBitSet(UINT8 b) {
+  return (b!=0) && ((b & (b-1))==0);
 }
 
 static WRITE_HANDLER(via0b_w) {
-  static UINT8 lampData, lampRow, col4[3];
-  static int colNum, segNum;
+  static UINT8 lampData = 0, lampRow = 0, col4[3] = {0,0,0};
+  static int segNum = 0;
   switch (locals.via_a >> 4) {
     case 0:
       sndbrd_0_data_w(0, ~data);
@@ -170,8 +171,8 @@ static WRITE_HANDLER(via0b_w) {
           break;
         case 2:
           lampRow = ~data;
-          if (countBits(lampRow) == 1) {
-            colNum = core_BitColToNum(lampRow);
+          if (singleBitSet(lampRow)) {
+            int colNum = core_BitColToNum(lampRow);
             coreGlobals.lampMatrix[colNum] = lampData;
             // column 4 is additionally fed with all 0 on champion, so buffer the previous value a while
             if (core_gameData->hw.lampCol && colNum == 4) {
@@ -187,6 +188,7 @@ static WRITE_HANDLER(via0b_w) {
           break;
         default:
           logerror("VIA A/B: %02x/%02x\n", locals.via_a, data);
+          break;
       }
       break;
     case 7:
@@ -197,6 +199,7 @@ static WRITE_HANDLER(via0b_w) {
       break;
     default:
       logerror("VIA A/B: %02x/%02x\n", locals.via_a, data);
+      break;
   }
 }
 

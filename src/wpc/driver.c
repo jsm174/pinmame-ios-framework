@@ -12,7 +12,7 @@ const struct GameDriver driver_0 = {
 #  undef DRIVERNV
 #  define DRIVER(name, ver) &driver_##name##_##ver,
 #  define DRIVERNV(name) &driver_##name,
-const struct GameDriver *drivers[] = {
+struct GameDriver *drivers[] = {
 #  include "driver.c"
 0 /* end of array */
 };
@@ -323,8 +323,9 @@ DRIVERNV(motrdomg)      //6803-0E69:07/86 MotorDome (German)
 DRIVERNV(blackblt)      //6803-0E52:07/86 Black Belt
 DRIVERNV(blackbl2)      //6803      07/86 Black Belt (Squawk & Talk)
 DRIVERNV(specforc)      //6803-0E47:08/86 Special Force
-DRIVERNV(strngsci)      //6803-0E35:10/86 Strange Science
+DRIVERNV(strngsci)      //6803-0E35:10/86 Strange Science (rev. A)
 DRIVERNV(strngscg)      //6803      10/86 Strange Science (German)
+DRIVERNV(strngscc)      //6803      12/86 Strange Science (rev. C)
 DRIVERNV(cityslck)      //6803-0E79:03/87 City Slicker
 DRIVERNV(hardbody)      //6803-0E94:02/87 Hardbody
 DRIVERNV(hardbdyg)      //6803      03/87 Hardbody (German)
@@ -392,7 +393,7 @@ DRIVERNV(uboat65)       //BY35ALPHA 04/88 U-Boat 65
 // ----------------
 // CAPCOM GAMES
 // ----------------
-DRIVERNV(ghv101)        // ??/95    Goofy Hoops (Romstar license)
+DRIVERNV(ghv101)        // 04/94    Goofy Hoops (Redemption) (Romstar license)
 DRIVERNV(pmv112)        // 10/95    Pinball Magic
 DRIVERNV(pmv112r)       // 10/95    Pinball Magic (Redemption)
 DRIVERNV(abv106)        // 03/96    Airborne
@@ -902,13 +903,13 @@ DRIVERNV(bsktball)      //Basket Ball (04/1987)
 // ----------------
 // ILLINOIS PINBALL GAMES
 // ----------------
-DRIVERNV(pp100)         // Pool Player v1.0 (2000)
+DRIVERNV(pp100)         //Pool Player v1.0 (2000)
 
 // ----------------
 // INDER GAMES
 // ----------------
-                        // Hot and Cold (1978)
-                        // Screech (1978)
+                        //Hot and Cold (1978)
+                        //Screech (1978)
 DRIVERNV(centauri)      //Centaur (1979)
 DRIVERNV(centaurj)      //Centaur (1979, alternate set)
 DRIVERNV(topazi)        //Topaz (1979)
@@ -1052,6 +1053,7 @@ DRIVERNV(rotation)      //Rotation VIII (v. 1.17, 1978?)
 // ----------------
 DRIVERNV(spirit76)      //Spirit of 76 (1975)
 DRIVERNV(lckydraw)      //Lucky Draw (1978)
+DRIVERNV(lckydraa)      //Lucky Draw (alternate version)
 
 // ----------------
 // MONROE BOWLING CO.
@@ -2321,9 +2323,10 @@ DRIVER(disco,l1)        //S3-483:   08/78 W Disco Fever
 //System 4
 DRIVER(pkrno,l1)        //S4-488:   10/78 W Pokerino
 DRIVER(phnix,l1)        //S4-485:   11/78 W Phoenix
-DRIVER(flash,l1)        //S4-486:   01/79 W Flash (L-1, green flipper ROMs)
-DRIVER(flash,l2)        //          01/79 W Flash (L-2, yellow flipper ROMs)
-DRIVER(flash,t1)        //                  Flash /10 Scoring Ted Estes
+DRIVER(flash,l1)        //S4-486:   ??/79 W Flash (Sys.6 L-1, green flipper ROMs)
+//DRIVER(flash,l1y)     //          01/79 W Flash (Sys.4 L-1, yellow flipper ROMs)
+DRIVER(flash,l2)        //          01/79 W Flash (Sys.4 L-2, yellow flipper ROMs)
+DRIVER(flash,t1)        //                  Flash (Sys.6 T-1 /10 Scoring Ted Estes)
 DRIVER(stlwr,l2)        //S4-490:   03/79 W Stellar Wars
                         //S?-491:   06/79 W Rock'N Roll
 //System 5
@@ -2336,7 +2339,7 @@ DRIVER(kingt,l1)        //S5-???:   ??/79 W King Tut (Shuffle)
 DRIVER(trizn,l1)        //S6-487:   07/79 W TriZone
 DRIVER(trizn,t1)        //                  TriZone /10 Scoring Ted Estes
 DRIVER(tmwrp,l2)        //S6-489:   09/79 W Time Warp (L-2)
-DRIVER(tmwrp,t2)        //                  Time Warp (L-2) /10 Scoring Ted Estes
+DRIVER(tmwrp,t2)        //                  Time Warp (L-2 /10 Scoring Ted Estes)
 DRIVER(tmwrp,l3)        //                  Time Warp (L-3)
 DRIVER(grgar,l1)        //S6-496:   11/79 W Gorgar
 DRIVER(grgar,t1)        //                  Gorgar /10 Scoring Ted Estes

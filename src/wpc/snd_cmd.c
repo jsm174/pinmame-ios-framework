@@ -48,14 +48,12 @@
  //#define WIN32_LEAN_AND_MEAN
  #endif
  #include <windows.h>
- #ifdef VPINMAME
- static DWORD timeGetTime2(void) {
-   return timeGetTime();
- }
+ #if !defined(__MINGW32__) || defined(VPINMAME)
+  #define timeGetTime2 timeGetTime
  #else // VPINMAME
- static DWORD timeGetTime2(void) {
-   return timer_get_time();
- }
+  static DWORD timeGetTime2(void) {
+    return (DWORD)(timer_get_time()*1000.); //!! meh!
+  }
  #endif
 #endif
 
@@ -899,7 +897,7 @@ static void wave_handle(void) {
 }
 
 static void wave_next(void) {
-  FILE *csv = NULL;
+  FILE *csv;
   char csvName[120];
   struct stat stat_buffer;
 
@@ -913,7 +911,7 @@ static void wave_next(void) {
   sprintf(csvName, "wave\\altsound-%s.csv", Machine->gamedrv->name);
 
   // check if this filename is not already used
-  if (csv = fopen(csvName, "r")) {
+  if ((csv = fopen(csvName, "r"))) {
     fclose(csv);
     csv = fopen(csvName, "a");
   }

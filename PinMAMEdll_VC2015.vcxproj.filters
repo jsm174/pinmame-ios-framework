@@ -552,6 +552,9 @@
     <ClCompile Include="src\sound\msm5205.c">
       <Filter>Source Files\MAME\Sound</Filter>
     </ClCompile>
+    <ClCompile Include="src\sound\qsound.c">
+      <Filter>Source Files\MAME\Sound</Filter>
+    </ClCompile>
     <ClCompile Include="src\sound\s14001a.c">
       <Filter>Source Files\MAME\Sound</Filter>
     </ClCompile>
@@ -1182,6 +1185,10 @@
     <ClCompile Include="src\win32com\Alias.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ext\vgm\vgmwrite.c" />
+    <ClCompile Include="src\wpc\dmddevice.cpp">
+      <Filter>Source Files\PinMAME</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\artwork.h">
@@ -1556,6 +1563,9 @@
     <ClInclude Include="src\sound\msm5205.h">
       <Filter>Source Files\MAME\Sound</Filter>
     </ClInclude>
+    <ClInclude Include="src\sound\qsound.h">
+      <Filter>Source Files\MAME\Sound</Filter>
+    </ClInclude>
     <ClInclude Include="src\sound\s14001a.h">
       <Filter>Source Files\MAME\Sound</Filter>
     </ClInclude>
@@ -1765,9 +1775,6 @@
     </ClInclude>
     <ClInclude Include="src\vc\unistd.h">
       <Filter>Source Files\VC</Filter>
-    </ClInclude>
-    <ClInclude Include="ext\vgm\vgmwrite.c">
-      <Filter>Source Files\external\vgm</Filter>
     </ClInclude>
     <ClInclude Include="ext\vgm\vgmwrite.h">
       <Filter>Source Files\external\vgm</Filter>
